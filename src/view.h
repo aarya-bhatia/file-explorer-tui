@@ -3,10 +3,6 @@
 #include "util.h"
 #include <ncurses.h>
 
-#define SELECTION_COLOR 1
-#define OTHER_MONTH_COLOR 2
-#define FOOTER_COLOR 3
-
 class View {
 protected:
   WINDOW *win = NULL;
@@ -37,3 +33,8 @@ public:
   void render(const AppState &state) override;
 };
 
+class FileListView : public View {
+public:
+  FileListView(int y, int x, int h, int w) : View(y, x, h, w) {}
+  void render(const AppState &state) override;
+};

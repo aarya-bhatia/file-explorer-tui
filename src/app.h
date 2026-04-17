@@ -11,7 +11,6 @@ class Application {
   std::vector<std::unique_ptr<View>> views;
 
 public:
-  const char *LOG_FILENAME = "app.log";
   static const int MIN_LINES = 20;
   static const int MIN_COLS = 50;
 

@@ -1,21 +1,12 @@
 #include "app.h"
 #include "util.h"
 #include "view.h"
-#include <fcntl.h>
-#include <memory.h>
 #include <ncurses.h>
 #include <stdio.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
 
 #define CTRL(c) ((c) & 0x1F)
 
 Application::Application() {
-  int logfile = open(LOG_FILENAME, O_CREAT | O_TRUNC | O_WRONLY, 0640);
-  dup2(logfile, 2);
-  close(logfile);
-  setlocale(LC_ALL, "");
   initscr();
   cbreak();
   noecho();
@@ -48,8 +39,9 @@ void Application::recompute_layout() {
   int footer_h = 1;
   int footer_y = header_h;
 
-  views.push_back(std::make_unique<HeaderView>(0, 0, header_h, COLS));
-  views.push_back(std::make_unique<FooterView>(footer_y, 0, footer_h, COLS));
+  views.push_back(std::make_unique<HeaderView>(0, 0, 1, COLS));
+  views.push_back(std::make_unique<FileListView>(2, 0, LINES-5, COLS));
+  views.push_back(std::make_unique<FooterView>(LINES-2, 0, 1, COLS));
 }
 
 void Application::render() {
