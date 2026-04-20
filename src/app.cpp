@@ -42,11 +42,17 @@ void Application::recompute_layout() {
   views.push_back(std::make_unique<HeaderView>(0, 0, 1, COLS));
   views.push_back(std::make_unique<FileListView>(2, 0, LINES - 5, COLS));
   views.push_back(std::make_unique<FooterView>(LINES - 2, 0, 1, COLS));
+
+  helpview = std::make_unique<HelpView>(0, 0, LINES, COLS);
 }
 
 void Application::render() {
-  for (auto &view : views) {
-    view->render(state);
+  if (state.show_help_menu) {
+    helpview->render(state);
+  } else {
+    for (auto &view : views) {
+      view->render(state);
+    }
   }
   doupdate();
 }
@@ -58,6 +64,9 @@ void Application::handle_input_actions(int ch) {
   switch (ch) {
   case 'q':
     state.running = false;
+    break;
+  case '?':
+    state.show_help_menu = !state.show_help_menu;
     break;
   case 'k':
     state.select_prev();

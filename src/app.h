@@ -9,6 +9,7 @@
 class Application {
   AppState state;
   std::vector<std::unique_ptr<View>> views;
+  std::unique_ptr<HelpView> helpview;
 
 public:
   static const int MIN_LINES = 20;

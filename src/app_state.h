@@ -18,8 +18,10 @@ struct AppState {
 
   AppState();
   ~AppState();
+
   bool running = true;
   bool show_dotfiles = false;
+  bool show_help_menu = false;
 
   bool init();
 
