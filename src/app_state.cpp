@@ -42,10 +42,29 @@ bool AppState::init() {
     log_printf("File: name=%s type=%d", entry->d_name, entry->d_type);
     if (show_dotfiles == false) {
       if (entry->d_namlen > 0 && entry->d_name[0] != '.') {
-        files.push_back(std::string(entry->d_name));
+        FileEntry::EntryType type;
+        switch (entry->d_type) {
+        case DT_DIR:
+          type = FileEntry::Directory;
+          break;
+        case DT_REG:
+          type = FileEntry::File;
+          break;
+        case DT_LNK:
+          type = FileEntry::Symlink;
+          break;
+        default:
+          type = FileEntry::Other;
+          break;
+        }
+        std::string filename = entry->d_name;
+        FileEntry entry = {type, filename};
+        files.push_back(entry);
       }
     }
   }
+
+  selected_entry = 0;
 
   return true;
 }

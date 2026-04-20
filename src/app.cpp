@@ -35,9 +35,9 @@ void Application::recompute_layout() {
 
   log_printf("screen size: %d x %d", LINES, COLS);
 
-  int header_h = 4;
-  int footer_h = 1;
-  int footer_y = header_h;
+  // int header_h = 4;
+  // int footer_h = 1;
+  // int footer_y = header_h;
 
   views.push_back(std::make_unique<HeaderView>(0, 0, 1, COLS));
   views.push_back(std::make_unique<FileListView>(2, 0, LINES-5, COLS));
