@@ -40,8 +40,8 @@ void Application::recompute_layout() {
   // int footer_y = header_h;
 
   views.push_back(std::make_unique<HeaderView>(0, 0, 1, COLS));
-  views.push_back(std::make_unique<FileListView>(2, 0, LINES-5, COLS));
-  views.push_back(std::make_unique<FooterView>(LINES-2, 0, 1, COLS));
+  views.push_back(std::make_unique<FileListView>(2, 0, LINES - 5, COLS));
+  views.push_back(std::make_unique<FooterView>(LINES - 2, 0, 1, COLS));
 }
 
 void Application::render() {
@@ -54,9 +54,26 @@ void Application::render() {
 void Application::handle_input_typing(int ch) {}
 
 void Application::handle_input_actions(int ch) {
+  log_printf("Got input: %d", ch);
   switch (ch) {
   case 'q':
     state.running = false;
+    break;
+  case 'k':
+    state.select_prev();
+    break;
+  case 'j':
+    state.select_next();
+    break;
+  case KEY_ENTER:
+  case '\n':
+    if (!state.enter_directory()) {
+      log_printf("Failed to open directory: %s",
+                 state.get_selected_filename().c_str());
+    }
+    break;
+  case '-':
+    state.open_parent_directory();
     break;
   }
 }
