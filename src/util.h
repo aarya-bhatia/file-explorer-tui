@@ -13,3 +13,6 @@
   } while (0)
 
 enum Colors { Red = 1, Blue, Green, Yellow };
+
+#define CTRL(c) ((c) & 0x1F)
+

@@ -4,9 +4,7 @@
 #include <ncurses.h>
 #include <stdio.h>
 
-#define CTRL(c) ((c) & 0x1F)
-
-Application::Application() {
+Application::Application(const char *cwd): state(cwd) {
   initscr();
   cbreak();
   noecho();

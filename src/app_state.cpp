@@ -13,10 +13,17 @@ AppState::FileEntry::EntryType map_to_entry_type(int dirent_type);
 
 AppState::~AppState() {}
 
-AppState::AppState() {
-  if (!init()) {
-    log_printf("%s", "Failed to initialize AppState");
-    running = false;
+AppState::AppState(const char *_cwd) {
+  if(!_cwd) {
+    if (!init()) {
+      log_puts("Failed to initialize AppState");
+      running = false;
+    }
+  } else {
+    cwd = std::string(_cwd);
+    if(!reload_file_list()) {
+      running = false;
+    }
   }
 }
 

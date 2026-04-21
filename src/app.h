@@ -15,7 +15,7 @@ public:
   static const int MIN_LINES = 20;
   static const int MIN_COLS = 50;
 
-  Application();
+  Application(const char *cwd = NULL);
   ~Application();
 
   void run();

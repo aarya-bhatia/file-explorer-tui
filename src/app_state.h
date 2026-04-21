@@ -16,7 +16,7 @@ struct AppState {
         : type(_type), filename(_filename) {}
   };
 
-  AppState();
+  AppState(const char *cwd = NULL);
   ~AppState();
 
   bool running = true;
