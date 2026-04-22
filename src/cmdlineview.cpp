@@ -13,7 +13,7 @@ void CmdLineView::render(const AppState &state) {
   } else {
     const std::string &selected_filename = state.get_selected_filename();
     FileStat s{};
-    get_file_stat(selected_filename.c_str(), s);
+    get_file_stat((state.cwd + "/" + selected_filename).c_str(), s);
     wattron(win, COLOR_PAIR(Colors::Blue));
     wprintw(win, "%s", s.mode_s);
     wattroff(win, COLOR_PAIR(Colors::Blue));

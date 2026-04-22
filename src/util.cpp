@@ -94,8 +94,10 @@ std::string get_last_access_date(struct timespec &atime) {
     time_t time_now = time(NULL);
     struct tm time_info_now;
     localtime_r(&time_now, &time_info_now);
-    if(time_info.tm_year == time_info_now.tm_year) strftime(date_s, sizeof date_s, "%b %d %H:%M:%S", &time_info);
-    else strftime(date_s, sizeof date_s, "%b %d, %y %H:%M:%S", &time_info);
+    if (time_info.tm_year == time_info_now.tm_year)
+      strftime(date_s, sizeof date_s, "%b %d %H:%M:%S", &time_info);
+    else
+      strftime(date_s, sizeof date_s, "%b %d, %y %H:%M:%S", &time_info);
     return std::string(date_s);
   }
 }
@@ -142,7 +144,7 @@ std::string get_groupname(gid_t gid) {
     perror("malloc");
     return "group";
   }
-  int s = getgrgid_r(gid, &grp, gbuf, bufsize, &g_result);
+  getgrgid_r(gid, &grp, gbuf, bufsize, &g_result);
   if (g_result != NULL) {
     log_printf("Group Name for GID %u is %s", gid, grp.gr_name);
     return std::string(grp.gr_name);
