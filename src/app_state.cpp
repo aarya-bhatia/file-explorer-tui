@@ -37,18 +37,17 @@ bool AppState::reload_file_list() {
     return false;
   }
 
-  log_printf("current working directory is %s", cwd.c_str());
+  log_printf("listing files in cwd:%s", cwd.c_str());
 
   while ((entry = readdir(dirp)) != NULL) {
-    log_printf("File: name=%s type=%d", entry->d_name, entry->d_type);
     if (show_dotfiles == false) {
       if (entry->d_namlen > 0 && entry->d_name[0] != '.') {
         FileEntry::EntryType type = map_to_entry_type(entry->d_type);
         files.emplace_back(
             std::make_unique<FileEntry>(type, std::string(entry->d_name)));
         const auto &fileentry = files.back();
-        log_printf("Added entry %s with type:%d", fileentry->filename.c_str(),
-                   fileentry->type);
+        // log_printf("Added entry %s with type:%d", fileentry->filename.c_str(),
+        //            fileentry->type);
       }
     }
   }

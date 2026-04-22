@@ -31,9 +31,11 @@ void FileListView::render(const AppState &state) {
       const auto &entry = state.files[i];
       if (i == state.selected_entry) {
         wattron(win, COLOR_PAIR(Colors::Green));
+        wprintw(win, ">");
         _draw_filename(win, entry);
         wattroff(win, COLOR_PAIR(Colors::Green));
       } else {
+        wprintw(win, " ");
         _draw_filename(win, entry);
       }
     }
