@@ -10,6 +10,7 @@ bool CreateFileCallback::run(AppState &state) {
              state.cmdline_input.c_str());
   std::string filepath = state.cmdline_input;
   if (filepath.empty()) {
+    state.statusline = "";
     return true;
   }
 
@@ -30,6 +31,7 @@ bool CreateFileCallback::run(AppState &state) {
     if (mkdir(filepath.c_str(), 0777) < 0) {
       perror("mkdir");
       state.statusline = "Failed to create directory " + filepath;
+      state.find_and_select(filepath);
     } else {
       state.reload_file_list();
       state.statusline = "successfully created directory " + filepath;
@@ -41,6 +43,7 @@ bool CreateFileCallback::run(AppState &state) {
       state.statusline = "Failed to create file " + filepath;
     } else {
       state.reload_file_list();
+      state.find_and_select(filepath);
       state.statusline = "successfully created file " + filepath;
     }
   }

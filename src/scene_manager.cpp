@@ -6,9 +6,9 @@ SceneManager::SceneManager(int h, int w) {
   refresh();
 
   views.push_back(std::make_unique<HeaderView>(0, 0, 1, w));
-  views.push_back(std::make_unique<FileListView>(2, 0, h - 6, w));
-  views.push_back(std::make_unique<CmdLineView>(h - 4, 0, 1, w));
-  views.push_back(std::make_unique<FooterView>(h - 2, 0, 1, w));
+  views.push_back(std::make_unique<FooterView>(2, 0, 1, w));
+  views.push_back(std::make_unique<FileListView>(4, 0, h - 6, w));
+  views.push_back(std::make_unique<CmdLineView>(h - 1, 0, 1, w));
 
   helpview = std::make_unique<HelpView>(0, 0, h, w);
 }

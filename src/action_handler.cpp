@@ -3,14 +3,22 @@
 #include <ncurses.h>
 
 bool ActionHandler::operator()(int ch, AppState &state) {
-  log_printf("Got input: %d", ch);
+  log_printf("Got input: 0x%0x", ch);
 
   if (ch == KEY_ENTER || ch == '\n') {
     return on_enter(state);
   }
 
   if (state.typing) {
-    state.cmdline_input += ch;
+    if (ch == KEY_BACKSPACE || ch == 127 || ch == '\b') {
+      state.cmdline_input.pop_back();
+    } else if (ch == CTRL('u')) {
+      state.cmdline_input.clear();
+    } else if (isprint(ch)) {
+      state.cmdline_input += ch;
+    } else {
+      log_puts("illegal input character");
+    }
     return true;
   }
 
@@ -47,7 +55,7 @@ bool ActionHandler::operator()(int ch, AppState &state) {
     return create_file_prompt(state);
   }
 
-  if(ch == CTRL('l')) {
+  if (ch == CTRL('l')) {
     log_puts("clearing statusline...");
     state.statushidden = !state.statushidden;
     return true;

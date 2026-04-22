@@ -1,4 +1,5 @@
 #pragma once
+#include "util.h"
 #include <assert.h>
 #include <map>
 #include <string>
@@ -26,7 +27,8 @@ struct AppState {
   bool typing = false;
   const char *prompt = "";
   std::string cmdline_input = "";
-  std::string statusline = "Type o to create file/directory. Toggle statusline with CTRL-l";
+  std::string statusline =
+      "Type o to create file/directory. Toggle statusline with CTRL-l";
   bool statushidden = false;
 
   bool init();
@@ -65,5 +67,13 @@ struct AppState {
   const std::string &get_selected_filename() const {
     return files[selected_entry]->filename;
   }
-};
 
+  void find_and_select(const std::string &filepath) {
+    for (int i = 0; i < files.size(); i++) {
+      if (is_same_file(files[i]->filename.c_str(), filepath.c_str())) {
+        selected_entry = i;
+        break;
+      }
+    }
+  }
+};
