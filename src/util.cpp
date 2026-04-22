@@ -80,7 +80,7 @@ void get_file_stat(const char *filepath, FileStat &filestat) {
     filestat.mode_s[9] = '-';
   }
 
-  filestat.mod_date = get_last_access_date(filestat.s.st_atimespec);
+  filestat.mod_date = get_last_access_date(filestat.s.st_mtimespec);
 }
 
 std::string get_last_access_date(struct timespec &atime) {
@@ -145,11 +145,14 @@ std::string get_groupname(gid_t gid) {
     return "group";
   }
   getgrgid_r(gid, &grp, gbuf, bufsize, &g_result);
+  std::string result;
   if (g_result != NULL) {
     log_printf("Group Name for GID %u is %s", gid, grp.gr_name);
-    return std::string(grp.gr_name);
+    result = std::string(grp.gr_name);
   } else {
     log_printf("Group name not found for GID %u", gid);
-    return "group";
+    result = "group";
   }
+  free(gbuf);
+  return result;
 }

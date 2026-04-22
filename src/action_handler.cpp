@@ -11,7 +11,8 @@ bool ActionHandler::operator()(int ch, AppState &state) {
 
   if (state.typing) {
     if (ch == KEY_BACKSPACE || ch == 127 || ch == '\b') {
-      state.cmdline_input.pop_back();
+      if (!state.cmdline_input.empty())
+        state.cmdline_input.pop_back();
     } else if (ch == CTRL('u')) {
       state.cmdline_input.clear();
     } else if (isprint(ch)) {

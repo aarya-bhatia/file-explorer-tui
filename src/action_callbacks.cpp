@@ -38,10 +38,12 @@ bool CreateFileCallback::run(AppState &state) {
     }
   } else {
     log_printf("creating file %s", filepath.c_str());
-    if (creat(filepath.c_str(), 0666) < 0) {
+    int fd = creat(filepath.c_str(), 0666);
+    if (fd < 0) {
       perror("creat");
       state.statusline = "Failed to create file " + filepath;
     } else {
+      close(fd);
       state.reload_file_list();
       state.find_and_select(filepath);
       state.statusline = "successfully created file " + filepath;

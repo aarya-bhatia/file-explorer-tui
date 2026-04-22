@@ -11,12 +11,12 @@
 void FooterView::render(const AppState &state) {
   werase(win);
   wmove(win, 0, 0);
-  const std::string &selected_filename = state.get_selected_filename();
   wattron(win, COLOR_PAIR(FOOTER_COLOR) | A_BOLD);
   wprintw(win, "%s", state.cwd.c_str());
   if (state.cwd != "/") wprintw(win, "/");
   wattroff(win, COLOR_PAIR(FOOTER_COLOR) | A_BOLD);
-  wprintw(win, "%s", selected_filename.c_str());
+  if (!state.files.empty())
+    wprintw(win, "%s", state.get_selected_filename().c_str());
 
   if (state.files.size() > 0) {
     char count[1024];

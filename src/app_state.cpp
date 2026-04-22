@@ -104,6 +104,7 @@ bool AppState::enter_directory() {
 bool AppState::open_parent_directory() {
   char s[1024];
   strncpy(s, cwd.c_str(), sizeof s - 1);
+  s[sizeof(s) - 1] = '\0';
   const char *dname = dirname(s);
   std::string dname_s = dname;
   return open_directory(dname_s);
@@ -115,6 +116,10 @@ bool AppState::open_directory(std::string &path) {
   if (lstat(path.c_str(), &s) < 0) {
     perror("lstat");
     log_printf("Failed to open dir: %s", path.c_str());
+    return false;
+  }
+  if (!S_ISDIR(s.st_mode)) {
+    log_printf("Not a directory: %s", path.c_str());
     return false;
   }
   cwd = path;

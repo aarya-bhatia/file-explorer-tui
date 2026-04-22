@@ -10,6 +10,8 @@ void CmdLineView::render(const AppState &state) {
     wprintw(win, "%s %s", state.prompt, state.cmdline_input.c_str());
     // } else if(!state.statushidden) {
     //   mvwprintw(win, 0, 0, "%s", state.statusline.c_str());
+  } else if (state.files.empty()) {
+    wprintw(win, "[Empty]");
   } else {
     const std::string &selected_filename = state.get_selected_filename();
     FileStat s{};
