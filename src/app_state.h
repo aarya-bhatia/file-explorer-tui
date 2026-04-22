@@ -26,6 +26,8 @@ struct AppState {
   bool typing = false;
   const char *prompt = "";
   std::string cmdline_input = "";
+  std::string statusline = "Type o to create file/directory. Toggle statusline with CTRL-l";
+  bool statushidden = false;
 
   bool init();
 

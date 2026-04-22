@@ -21,6 +21,7 @@ bool CreateFileCallback::run(AppState &state) {
   memset(&st, 0, sizeof st);
   if (stat(filepath.c_str(), &st) >= 0) {
     log_printf("file already exists %s", filepath.c_str());
+    state.statusline = "file already exists " + filepath;
     return true;
   }
 
@@ -28,16 +29,22 @@ bool CreateFileCallback::run(AppState &state) {
     log_printf("creating directory %s", filepath.c_str());
     if (mkdir(filepath.c_str(), 777) < 0) {
       perror("mkdir");
+      state.statusline = "Failed to create directory " + filepath;
     } else {
       state.reload_file_list();
+      state.statusline = "successfully created directory " + filepath;
     }
   } else {
     log_printf("creating file %s", filepath.c_str());
     if (creat(filepath.c_str(), 777) < 0) {
       perror("creat");
+      state.statusline = "Failed to create file " + filepath;
     } else {
       state.reload_file_list();
+      state.statusline = "successfully created file " + filepath;
     }
   }
   return true;
 }
+
+// bool RemoveFileCallback

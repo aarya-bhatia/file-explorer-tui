@@ -7,7 +7,9 @@ void CmdLineView::render(const AppState &state) {
 
   if(state.typing) {
     mvwprintw(win, 0, 0, "%s %s", state.prompt, state.cmdline_input.c_str());
-  } 
+  } else if(!state.statushidden) {
+    mvwprintw(win, 0, 0, "%s", state.statusline.c_str());
+  }
 
   wnoutrefresh(win);
 }

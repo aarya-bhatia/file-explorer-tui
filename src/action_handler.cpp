@@ -47,6 +47,12 @@ bool ActionHandler::operator()(int ch, AppState &state) {
     return create_file_prompt(state);
   }
 
+  if(ch == CTRL('l')) {
+    log_puts("clearing statusline...");
+    state.statushidden = !state.statushidden;
+    return true;
+  }
+
   return false;
 }
 

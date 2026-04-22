@@ -10,3 +10,7 @@ struct CreateFileCallback: ActionCallback {
   bool run(AppState &state);
 };
 
+// struct RemoveFileCallback: ActionCallback {
+//   bool run(AppState &state);
+// };
+//
