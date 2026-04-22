@@ -27,7 +27,7 @@ bool CreateFileCallback::run(AppState &state) {
 
   if (filepath.back() == '/') {
     log_printf("creating directory %s", filepath.c_str());
-    if (mkdir(filepath.c_str(), 777) < 0) {
+    if (mkdir(filepath.c_str(), 0777) < 0) {
       perror("mkdir");
       state.statusline = "Failed to create directory " + filepath;
     } else {
@@ -36,7 +36,7 @@ bool CreateFileCallback::run(AppState &state) {
     }
   } else {
     log_printf("creating file %s", filepath.c_str());
-    if (creat(filepath.c_str(), 777) < 0) {
+    if (creat(filepath.c_str(), 0666) < 0) {
       perror("creat");
       state.statusline = "Failed to create file " + filepath;
     } else {
@@ -47,4 +47,3 @@ bool CreateFileCallback::run(AppState &state) {
   return true;
 }
 
-// bool RemoveFileCallback
