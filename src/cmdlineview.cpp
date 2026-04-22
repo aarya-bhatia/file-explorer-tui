@@ -21,6 +21,7 @@ void CmdLineView::render(const AppState &state) {
     wattroff(win, COLOR_PAIR(Colors::Blue));
     wprintw(win, " %s %s %s", s.owner_name.c_str(), s.group_name.c_str(),
             s.mod_date.c_str());
+    wprintw(win, " %lu", s.s.st_size);
   }
 
   wnoutrefresh(win);
