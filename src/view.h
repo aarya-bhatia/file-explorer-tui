@@ -44,3 +44,9 @@ public:
   HelpView(int y, int x, int h, int w) : View(y, x, h, w) {}
   void render(const AppState &state) override;
 };
+
+class CmdLineView: public View {
+public:
+  CmdLineView(int y, int x, int h, int w) : View(y, x, h, w) {}
+  void render(const AppState &state) override;
+};

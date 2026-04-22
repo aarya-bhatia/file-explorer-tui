@@ -23,6 +23,10 @@ struct AppState {
   bool show_dotfiles = false;
   bool show_help_menu = false;
 
+  bool typing = false;
+  const char *prompt = "";
+  std::string cmdline_input = "";
+
   bool init();
 
   std::vector<std::unique_ptr<FileEntry>> files;
@@ -60,3 +64,4 @@ struct AppState {
     return files[selected_entry]->filename;
   }
 };
+
