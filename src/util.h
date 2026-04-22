@@ -15,4 +15,6 @@
 enum Colors { Red = 1, Blue, Green, Yellow };
 
 #define CTRL(c) ((c) & 0x1F)
+#define MIN_LINES 20
+#define MIN_COLS 50
 
