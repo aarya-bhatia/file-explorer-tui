@@ -5,7 +5,7 @@ SceneManager::SceneManager(int h, int w) {
   erase();
   refresh();
 
-  views.push_back(std::make_unique<FooterView>(0, 0, 1, w));
+  views.push_back(std::make_unique<TitleView>(0, 0, 1, w));
   views.push_back(std::make_unique<FileListView>(1, 0, h - 3, w));
   views.push_back(std::make_unique<CmdLineView>(h - 1, 0, 1, w));
 

@@ -27,9 +27,9 @@ public:
   void render(const AppState &state) override;
 };
 
-class FooterView : public View {
+class TitleView : public View {
 public:
-  FooterView(int y, int x, int h, int w) : View(y, x, h, w) {}
+  TitleView(int y, int x, int h, int w) : View(y, x, h, w) {}
   void render(const AppState &state) override;
 };
 

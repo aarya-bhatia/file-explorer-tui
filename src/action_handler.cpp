@@ -67,7 +67,7 @@ bool ActionHandler::operator()(int ch, AppState &state) {
 
 bool ActionHandler::create_file_prompt(AppState &state) {
   state.typing = true;
-  state.prompt = "Enter file name > ";
+  state.prompt = "Enter file name >";
   state.cmdline_input = "";
   next_callback = std::make_unique<CreateFileCallback>();
   return true;

@@ -97,7 +97,7 @@ std::string get_last_access_date(struct timespec &atime) {
     if (time_info.tm_year == time_info_now.tm_year)
       strftime(date_s, sizeof date_s, "%b %d %H:%M", &time_info);
     else
-      strftime(date_s, sizeof date_s, "%b %d, %y %H:%M", &time_info);
+      strftime(date_s, sizeof date_s, "%b %d, %Y %H:%M", &time_info);
     return std::string(date_s);
   }
 }

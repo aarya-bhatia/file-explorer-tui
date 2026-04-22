@@ -15,6 +15,7 @@ Application::Application(const char *cwd) : state(cwd) {
   init_pair(Colors::Blue, COLOR_BLUE, -1);
   init_pair(Colors::Green, COLOR_GREEN, -1);
   init_pair(Colors::Yellow, COLOR_YELLOW, -1);
+  init_pair(5, COLOR_BLACK, COLOR_BLUE);
   resize();
 }
 

@@ -30,9 +30,9 @@ void FileListView::render(const AppState &state) {
       wmove(win, i, 0);
       const auto &entry = state.files[i];
       if (i == state.selected_entry) {
-        wattron(win, COLOR_PAIR(Colors::Yellow) | A_BOLD);
+        wattron(win, COLOR_PAIR(Colors::Green));
         _draw_filename(win, entry);
-        wattroff(win, COLOR_PAIR(Colors::Yellow) | A_BOLD);
+        wattroff(win, COLOR_PAIR(Colors::Green));
       } else {
         _draw_filename(win, entry);
       }
