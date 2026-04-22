@@ -12,7 +12,7 @@ void FooterView::render(const AppState &state) {
   werase(win);
   wmove(win, 0, 0);
   wattron(win, COLOR_PAIR(FOOTER_COLOR) | A_BOLD);
-  wprintw(win, "%s", state.cwd.c_str());
+  wprintw(win, "$ %s", state.cwd.c_str());
   if (state.cwd != "/") wprintw(win, "/");
   wattroff(win, COLOR_PAIR(FOOTER_COLOR) | A_BOLD);
   if (!state.files.empty())

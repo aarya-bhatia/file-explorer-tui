@@ -3,7 +3,7 @@
 #include <ncurses.h>
 
 bool ActionHandler::operator()(int ch, AppState &state) {
-  log_printf("Got input: 0x%0x", ch);
+  // log_printf("Got input: 0x%0x", ch);
 
   if (ch == KEY_ENTER || ch == '\n') {
     return on_enter(state);

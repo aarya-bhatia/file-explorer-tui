@@ -95,19 +95,19 @@ std::string get_last_access_date(struct timespec &atime) {
     struct tm time_info_now;
     localtime_r(&time_now, &time_info_now);
     if (time_info.tm_year == time_info_now.tm_year)
-      strftime(date_s, sizeof date_s, "%b %d %H:%M:%S", &time_info);
+      strftime(date_s, sizeof date_s, "%b %d %H:%M", &time_info);
     else
-      strftime(date_s, sizeof date_s, "%b %d, %y %H:%M:%S", &time_info);
+      strftime(date_s, sizeof date_s, "%b %d, %y %H:%M", &time_info);
     return std::string(date_s);
   }
 }
 
 std::string get_username(uid_t uid) {
 
-  struct passwd p{};
+  struct passwd p, *result;
   size_t bufsize = sysconf(_SC_GETPW_R_SIZE_MAX);
-  if (bufsize == -1) /* Value was indeterminate */
-    bufsize = 16384; /* Should be more than enough */
+  if (bufsize == -1)
+    bufsize = 16384;
 
   char *buf = (char *)malloc(bufsize);
   if (buf == NULL) {
@@ -115,20 +115,13 @@ std::string get_username(uid_t uid) {
     return "user";
   }
 
-  struct passwd *result = NULL;
-  int s = getpwuid_r(uid, &p, buf, bufsize, &result);
+  getpwuid_r(uid, &p, buf, bufsize, &result);
   if (!result) {
-    if (s == 0) {
-      log_printf("No entry for UID %u", uid);
-    } else
-      errno = s;
-    perror("getpwuid_r");
     free(buf);
     return "user";
   }
 
   std::string username = p.pw_name;
-  log_printf("found username for uid=%d:%s", uid, p.pw_name);
   free(buf);
   return username;
 }
@@ -147,10 +140,8 @@ std::string get_groupname(gid_t gid) {
   getgrgid_r(gid, &grp, gbuf, bufsize, &g_result);
   std::string result;
   if (g_result != NULL) {
-    log_printf("Group Name for GID %u is %s", gid, grp.gr_name);
     result = std::string(grp.gr_name);
   } else {
-    log_printf("Group name not found for GID %u", gid);
     result = "group";
   }
   free(gbuf);
