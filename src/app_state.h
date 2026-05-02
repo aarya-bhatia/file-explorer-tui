@@ -20,6 +20,11 @@ struct AppState {
   AppState(const char *cwd = NULL);
   ~AppState();
 
+  int user_scroll = 0;
+
+  int view_height, view_width;
+  int file_view_height;
+
   bool running = true;
   bool show_dotfiles = false;
   bool show_help_menu = false;
@@ -77,4 +82,39 @@ struct AppState {
     }
   }
 
+  int window_top_file_index() { return user_scroll; }
+
+  int window_bottom_file_index() { return user_scroll + file_view_height - 1; }
+
+  int window_count_visible_files() { return files.size() - user_scroll; }
+
+  void window_select_bottom_file() {
+    selected_entry = window_bottom_file_index();
+  }
+
+  void window_select_top_file() { selected_entry = window_top_file_index(); }
+
+  bool window_is_file_visible(int index) {
+    return index >= window_top_file_index() &&
+           index <= window_bottom_file_index();
+  }
+
+  void scroll_down() { 
+    if (window_count_visible_files() < file_view_height) {
+      return;
+    }
+
+    assert(user_scroll < files.size());
+    user_scroll++;
+  }
+
+  void scroll_up() { 
+    if(user_scroll > 0) user_scroll--; 
+  }
+
+  void resize(int lines, int cols) {
+    view_width = cols;
+    view_height = lines;
+    file_view_height = lines - 3;
+  }
 };

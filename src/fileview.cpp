@@ -26,8 +26,12 @@ void FileListView::render(const AppState &state) {
   if (state.files.empty()) {
     wprintw(win, "[Empty]");
   } else {
-    for (int i = 0; i < state.files.size(); i++) {
-      wmove(win, i, 0);
+    for (int i = state.user_scroll;
+         i < std::min(state.file_view_height + state.user_scroll,
+                      (int)state.files.size());
+         i++) {
+      int y = i - state.user_scroll;
+      wmove(win, y, 0);
       const auto &entry = state.files[i];
       if (i == state.selected_entry) {
         wattron(win, COLOR_PAIR(Colors::Green));

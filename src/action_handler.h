@@ -9,4 +9,6 @@ struct ActionHandler {
 private:
   bool on_enter(AppState &state);
   bool create_file_prompt(AppState &state);
+  void handle_down_key(AppState &state);
+  void handle_up_key(AppState &state);
 };

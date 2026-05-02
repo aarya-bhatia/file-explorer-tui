@@ -36,12 +36,12 @@ bool ActionHandler::operator()(int ch, AppState &state) {
   }
 
   if (ch == 'k') {
-    state.select_prev();
+    handle_up_key(state);
     return true;
   }
 
   if (ch == 'j') {
-    state.select_next();
+    handle_down_key(state);
     return true;
   }
 
@@ -63,6 +63,24 @@ bool ActionHandler::operator()(int ch, AppState &state) {
   }
 
   return false;
+}
+
+void ActionHandler::handle_down_key(AppState &state) {
+  if (!state.select_next())
+    return;
+
+  if (state.selected_entry == state.window_bottom_file_index()) {
+    state.scroll_down();
+  }
+}
+
+void ActionHandler::handle_up_key(AppState &state) {
+  if (!state.select_prev())
+    return;
+
+  if (state.selected_entry == state.window_top_file_index()) {
+    state.scroll_up();
+  }
 }
 
 bool ActionHandler::create_file_prompt(AppState &state) {

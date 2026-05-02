@@ -1,5 +1,6 @@
 #pragma once
 #include "view.h"
+#include "app_state.h"
 #include <memory>
 #include <vector>
 
@@ -8,6 +9,7 @@ class SceneManager {
   std::unique_ptr<HelpView> helpview;
 
 public:
-  SceneManager(int h, int w);
+  SceneManager(const AppState &state, int h, int w);
   void render(const AppState &state);
+  int file_view_height;
 };

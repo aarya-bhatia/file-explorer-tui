@@ -26,8 +26,10 @@ void Application::resize() {
     return;
   }
 
+  state.resize(LINES, COLS);
+
   log_printf("screen size: %d x %d", LINES, COLS);
-  scene_manager = std::make_unique<SceneManager>(LINES, COLS);
+  scene_manager = std::make_unique<SceneManager>(state, LINES, COLS);
 }
 
 Application::~Application() {

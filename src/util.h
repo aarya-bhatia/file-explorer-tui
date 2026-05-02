@@ -1,9 +1,7 @@
 #pragma once
-#include <stdio.h>
 #include <string>
 #include <sys/stat.h>
 #include <pwd.h>
-#include <array>
 
 #define log_puts(s)                                                            \
   do {                                                                         \
@@ -18,8 +16,8 @@
 enum Colors { Red = 1, Blue, Green, Yellow };
 
 #define CTRL(c) ((c) & 0x1F)
-#define MIN_LINES 20
-#define MIN_COLS 50
+#define MIN_LINES 3
+#define MIN_COLS 20
 
 inline int is_same_file(const char *path1, const char *path2) {
   struct stat stat1, stat2;
