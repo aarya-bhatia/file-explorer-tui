@@ -16,7 +16,7 @@ AppState::~AppState() {}
 AppState::AppState(const char *_cwd) {
   if(!_cwd) {
     if (!init()) {
-      log_puts("Failed to initialize AppState");
+      log_info("Failed to initialize AppState");
       running = false;
     }
   } else {
@@ -37,7 +37,7 @@ bool AppState::reload_file_list() {
     return false;
   }
 
-  log_printf("listing files in cwd:%s", cwd.c_str());
+  log_info("listing files in cwd:%s", cwd.c_str());
 
   while ((entry = readdir(dirp)) != NULL) {
     if (show_dotfiles == false) {
@@ -46,14 +46,14 @@ bool AppState::reload_file_list() {
         files.emplace_back(
             std::make_unique<FileEntry>(type, std::string(entry->d_name)));
         const auto &fileentry = files.back();
-        // log_printf("Added entry %s with type:%d", fileentry->filename.c_str(),
+        // log_info("Added entry %s with type:%d", fileentry->filename.c_str(),
         //            fileentry->type);
       }
     }
   }
 
   closedir(dirp);
-  log_printf("Total files: %ld", files.size());
+  log_info("Total files: %ld", files.size());
   return true;
 }
 
@@ -114,15 +114,15 @@ bool AppState::open_directory(std::string &path) {
   memset(&s, 0, sizeof s);
   if (lstat(path.c_str(), &s) < 0) {
     perror("lstat");
-    log_printf("Failed to open dir: %s", path.c_str());
+    log_info("Failed to open dir: %s", path.c_str());
     return false;
   }
   if (!S_ISDIR(s.st_mode)) {
-    log_printf("Not a directory: %s", path.c_str());
+    log_info("Not a directory: %s", path.c_str());
     return false;
   }
   cwd = path;
-  log_printf("changed cwd: %s", cwd.c_str());
+  log_info("changed cwd: %s", cwd.c_str());
   reload_file_list();
   selected_entry = 0;
   return true;

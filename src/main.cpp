@@ -18,7 +18,7 @@ int main(int argc, const char **argv) {
       perror("realpath");
       exit(1);
     }
-    log_printf("Start directory: %s", abspath);
+    log_info("Start directory: %s", abspath);
   }
 
   Application app(abspath);

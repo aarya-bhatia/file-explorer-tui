@@ -3,7 +3,7 @@
 #include <ncurses.h>
 
 bool ActionHandler::operator()(int ch, AppState &state) {
-  // log_printf("Got input: 0x%0x", ch);
+  // log_info("Got input: 0x%0x", ch);
 
   if (ch == KEY_ENTER || ch == '\n') {
     return on_enter(state);
@@ -18,19 +18,19 @@ bool ActionHandler::operator()(int ch, AppState &state) {
     } else if (isprint(ch)) {
       state.cmdline_input += ch;
     } else {
-      log_puts("illegal input character");
+      log_info("illegal input character");
     }
     return true;
   }
 
   if (ch == 'q') {
-    log_puts("Stopping application...");
+    log_info("Stopping application...");
     state.running = false;
     return true;
   }
 
   if (ch == '?') {
-    log_puts("Opening help menu...");
+    log_info("Opening help menu...");
     state.show_help_menu = !state.show_help_menu;
     return true;
   }
@@ -46,18 +46,18 @@ bool ActionHandler::operator()(int ch, AppState &state) {
   }
 
   if (ch == '-') {
-    log_puts("Opening parent directory...");
+    log_info("Opening parent directory...");
     state.open_parent_directory();
     return true;
   }
 
   if (ch == 'o') {
-    log_puts("Create file request...");
+    log_info("Create file request...");
     return create_file_prompt(state);
   }
 
   if (ch == CTRL('l')) {
-    log_puts("clearing statusline...");
+    log_info("clearing statusline...");
     state.statushidden = !state.statushidden;
     return true;
   }
@@ -93,9 +93,9 @@ bool ActionHandler::create_file_prompt(AppState &state) {
 
 bool ActionHandler::on_enter(AppState &state) {
   if (state.typing) {
-    log_puts("Running callback...");
+    log_info("Running callback...");
     if (!next_callback) {
-      log_puts("ERROR callback is null");
+      log_info("ERROR callback is null");
     } else {
       next_callback->run(state);
       state.typing = false;
@@ -104,9 +104,9 @@ bool ActionHandler::on_enter(AppState &state) {
       next_callback = nullptr;
     }
   } else {
-    log_puts("Opening directory...");
+    log_info("Opening directory...");
     if (!state.enter_directory()) {
-      log_printf("Failed to open directory: %s",
+      log_info("Failed to open directory: %s",
                  state.get_selected_filename().c_str());
     }
   }

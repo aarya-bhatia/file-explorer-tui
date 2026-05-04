@@ -21,19 +21,19 @@ Application::Application(const char *cwd) : state(cwd) {
 
 void Application::resize() {
   if (LINES < MIN_LINES || COLS < MIN_COLS) {
-    log_printf("screen is too small (min: %d x %d)", MIN_LINES, MIN_COLS);
+    log_info("screen is too small (min: %d x %d)", MIN_LINES, MIN_COLS);
     state.running = false;
     return;
   }
 
   state.resize(LINES, COLS);
 
-  log_printf("screen size: %d x %d", LINES, COLS);
+  log_info("screen size: %d x %d", LINES, COLS);
   scene_manager = std::make_unique<SceneManager>(state, LINES, COLS);
 }
 
 Application::~Application() {
-  log_puts("exiting ncurses");
+  log_info("exiting ncurses");
   endwin();
 }
 
@@ -48,7 +48,7 @@ void Application::run() {
       return;
     }
     if (!action_handler(ch, state)) {
-      log_printf("Failed to handle action for key 0x%x", ch);
+      log_info("Failed to handle action for key 0x%x", ch);
     }
   }
 }

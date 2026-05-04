@@ -6,7 +6,7 @@
 #include <unistd.h>
 
 bool CreateFileCallback::run(AppState &state) {
-  log_printf("Started CreateFileCallback with input:%s",
+  log_info("Started CreateFileCallback with input:%s",
              state.cmdline_input.c_str());
   std::string filepath = state.cmdline_input;
   if (filepath.empty()) {
@@ -21,13 +21,13 @@ bool CreateFileCallback::run(AppState &state) {
   struct stat st;
   memset(&st, 0, sizeof st);
   if (stat(filepath.c_str(), &st) >= 0) {
-    log_printf("file already exists %s", filepath.c_str());
+    log_info("file already exists %s", filepath.c_str());
     state.statusline = "file already exists " + filepath;
     return true;
   }
 
   if (filepath.back() == '/') {
-    log_printf("creating directory %s", filepath.c_str());
+    log_info("creating directory %s", filepath.c_str());
     if (mkdir(filepath.c_str(), 0777) < 0) {
       perror("mkdir");
       state.statusline = "Failed to create directory " + filepath;
@@ -37,7 +37,7 @@ bool CreateFileCallback::run(AppState &state) {
       state.statusline = "successfully created directory " + filepath;
     }
   } else {
-    log_printf("creating file %s", filepath.c_str());
+    log_info("creating file %s", filepath.c_str());
     int fd = creat(filepath.c_str(), 0666);
     if (fd < 0) {
       perror("creat");
