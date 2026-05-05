@@ -35,7 +35,7 @@ void print_file_preview(WINDOW *win, FILE *fp) {
     if (bytes_read == 0)
       break;
 
-    if(memchr(linebuf, '\0', bytes_read) != NULL) {
+    if (memchr(linebuf, '\0', bytes_read) != NULL) {
       wprintw(win, "<binary>");
       break;
     }
@@ -81,8 +81,9 @@ void FilePreviewView::render(const AppState &state) {
   FILE *fp = NULL;
   DIR *dp = NULL;
 
-  switch (state.files[state.selected_entry]->type) {
-  case AppState::FileEntry::EntryType::Directory:
+  auto &filemode = state.files[state.selected_entry]->st.st_mode;
+
+  if (S_ISDIR(filemode)) {
     dp = opendir(abspath.c_str());
     if (!dp) {
       mvwprintw(win, 0, 0, "Error: Could not open directory.");
@@ -91,9 +92,7 @@ void FilePreviewView::render(const AppState &state) {
       closedir(dp);
       dp = NULL;
     }
-    break;
-  case AppState::FileEntry::EntryType::File:
-  case AppState::FileEntry::EntryType::Symlink:
+  } else if (S_ISREG(filemode) || S_ISLNK(filemode)) {
     fp = fopen(abspath.c_str(), "rb");
     if (!fp) {
       mvwprintw(win, 0, 0, "Error: Could not open file.");
@@ -102,9 +101,6 @@ void FilePreviewView::render(const AppState &state) {
       fclose(fp);
       fp = NULL;
     }
-    break;
-  default:
-    break;
   }
 
   wnoutrefresh(win);

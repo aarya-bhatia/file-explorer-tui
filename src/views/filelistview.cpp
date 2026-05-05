@@ -1,20 +1,15 @@
 #include "filelistview.h"
 
-void _draw_filename(WINDOW *win,
-                    const std::unique_ptr<AppState::FileEntry> &entry) {
-  switch (entry->type) {
-  case AppState::FileEntry::File:
-    wprintw(win, "%s", entry->filename.c_str());
-    break;
-  case AppState::FileEntry::Directory:
+void _draw_filename(WINDOW *win, const std::unique_ptr<File> &entry) {
+  auto &filemode = entry->st.st_mode;
+  if (S_ISDIR(filemode)) {
     wprintw(win, "%s/", entry->filename.c_str());
-    break;
-  case AppState::FileEntry::Symlink:
+  } else if (S_ISREG(filemode)) {
+    wprintw(win, "%s", entry->filename.c_str());
+  } else if (S_ISLNK(filemode)) {
     wprintw(win, "%s@", entry->filename.c_str());
-    break;
-  default:
+  } else {
     wprintw(win, "? %s", entry->filename.c_str());
-    break;
   }
 }
 

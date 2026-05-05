@@ -1,22 +1,12 @@
 #pragma once
 #include "util.h"
 #include <assert.h>
-#include <map>
 #include <string>
 #include <time.h>
 #include <vector>
-
-#define DATA_DIRECTORY "data/"
+#include "file.h"
 
 struct AppState {
-  struct FileEntry {
-    enum EntryType { File, Directory, Symlink, Other } type = File;
-    std::string filename = "";
-
-    FileEntry(EntryType _type, const std::string &_filename)
-        : type(_type), filename(_filename) {}
-  };
-
   AppState(const char *cwd = NULL);
   ~AppState();
 
@@ -38,7 +28,7 @@ struct AppState {
 
   bool init();
 
-  std::vector<std::unique_ptr<FileEntry>> files;
+  std::vector<std::unique_ptr<File>> files;
   std::string cwd;
   int selected_entry = 0;
 
@@ -65,7 +55,7 @@ struct AppState {
   bool open_parent_directory();
   bool open_directory(std::string &path);
 
-  const std::unique_ptr<AppState::FileEntry> &get_selected_entry() const {
+  const std::unique_ptr<File> &get_selected_entry() const {
     return files[selected_entry];
   }
 

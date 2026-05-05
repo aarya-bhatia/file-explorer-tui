@@ -11,7 +11,7 @@ INC_DIR=$(shell find src -type d)
 INC_FLAGS=$(addprefix -I, $(INC_DIR))
 
 LDFLAGS=-lncurses -lm
-CXXFLAGS=-c -Wall -std=c++14 -MMD -MP $(INC_FLAGS)
+CXXFLAGS=-c -Wall -std=c++17 -MMD -MP $(INC_FLAGS)
 CFLAGS=-c -Wall -std=c99 -MMD -MP $(INC_FLAGS)
 
 main: $(SRC_OBJECTS)

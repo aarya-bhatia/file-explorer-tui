@@ -1,5 +1,4 @@
-#include "app_state.h"
-#include "util.h"
+#include "include/app_state.h"
 #include <cstring>
 #include <dirent.h>
 #include <libgen.h>
@@ -9,19 +8,17 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-AppState::FileEntry::EntryType map_to_entry_type(int dirent_type);
-
 AppState::~AppState() {}
 
 AppState::AppState(const char *_cwd) {
-  if(!_cwd) {
+  if (!_cwd) {
     if (!init()) {
       log_info("Failed to initialize AppState");
       running = false;
     }
   } else {
     cwd = std::string(_cwd);
-    if(!reload_file_list()) {
+    if (!reload_file_list()) {
       running = false;
     }
   }
@@ -42,9 +39,8 @@ bool AppState::reload_file_list() {
   while ((entry = readdir(dirp)) != NULL) {
     if (show_dotfiles == false) {
       if (entry->d_namlen > 0 && entry->d_name[0] != '.') {
-        FileEntry::EntryType type = map_to_entry_type(entry->d_type);
         files.emplace_back(
-            std::make_unique<FileEntry>(type, std::string(entry->d_name)));
+            std::make_unique<File>(cwd, std::string(entry->d_name)));
       }
     }
   }
@@ -76,21 +72,9 @@ bool AppState::init() {
   return true;
 }
 
-AppState::FileEntry::EntryType map_to_entry_type(int dirent_type) {
-  switch (dirent_type) {
-  case DT_DIR:
-    return AppState::FileEntry::Directory;
-  case DT_REG:
-    return AppState::FileEntry::File;
-  case DT_LNK:
-    return AppState::FileEntry::Symlink;
-  default:
-    return AppState::FileEntry::Other;
-  }
-}
 bool AppState::enter_directory() {
   assert(selected_entry < files.size());
-  if (files[selected_entry]->type != FileEntry::EntryType::Directory) {
+  if (!S_ISDIR(files[selected_entry]->st.st_mode)) {
     return false;
   }
   std::string new_dir = cwd + "/" + get_selected_filename();
