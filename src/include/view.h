@@ -28,7 +28,7 @@ public:
 
 class TitleView : public View {
 public:
-  TitleView(int y, int x, int h, int w) : View(y, x, h, w) {_init();}
+  TitleView(int y, int x, int h, int w);
   void render(const AppState &state) override;
   std::string titleline = "";
 private:

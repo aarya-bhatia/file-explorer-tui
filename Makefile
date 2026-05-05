@@ -4,8 +4,8 @@ SRC_FILES=$(shell find src -type f -name "*.cpp" -o -name "*.c")
 SRC_OBJECTS=$(SRC_FILES:src/%=obj/%.o)
 
 LDFLAGS=-lncurses -lm
-CXXFLAGS=-c -Wall -std=c++14
-CFLAGS=-c -Wall -std=c99 
+CXXFLAGS=-c -Wall -std=c++14 -Isrc/include
+CFLAGS=-c -Wall -std=c99 -Isrc/include
 
 main: $(SRC_OBJECTS)
 	g++ $(LDFLAGS) $^ -o $@

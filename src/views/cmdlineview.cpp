@@ -8,8 +8,6 @@ void CmdLineView::render(const AppState &state) {
 
   if (state.typing) {
     wprintw(win, "%s %s", state.prompt, state.cmdline_input.c_str());
-    // } else if(!state.statushidden) {
-    //   mvwprintw(win, 0, 0, "%s", state.statusline.c_str());
   } else if (state.files.empty()) {
     wprintw(win, "[Empty]");
   } else {
@@ -26,3 +24,5 @@ void CmdLineView::render(const AppState &state) {
 
   wnoutrefresh(win);
 }
+
+TitleView::TitleView(int y, int x, int h, int w) : View(y, x, h, w) { _init(); }
