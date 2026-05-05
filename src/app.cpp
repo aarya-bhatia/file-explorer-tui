@@ -168,6 +168,21 @@ bool Application::handle_input(int ch) {
     return true;
   }
 
+  if(ch == 'L'){
+    state.selected_entry = state.window_bottom_file_index();
+    return true;
+  }
+
+  if(ch == 'H'){
+    state.selected_entry = state.window_top_file_index();
+    return true;
+  }
+
+  if(ch == 'M') {
+    state.selected_entry = (state.window_bottom_file_index() - state.window_top_file_index())/2;
+    return true;
+  }
+
   return false;
 }
 
