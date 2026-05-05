@@ -28,14 +28,20 @@ public:
 
 class TitleView : public View {
 public:
-  TitleView(int y, int x, int h, int w) : View(y, x, h, w) {}
+  TitleView(int y, int x, int h, int w) : View(y, x, h, w) {_init();}
   void render(const AppState &state) override;
+  std::string titleline = "";
+private:
+  void _init();
 };
 
 class FileListView : public View {
 public:
   FileListView(int y, int x, int h, int w) : View(y, x, h, w) {}
   void render(const AppState &state) override;
+private:
+  int _prev_sel;
+  std::string _prev_cwd;
 };
 
 class HelpView: public View { 

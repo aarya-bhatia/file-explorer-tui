@@ -92,7 +92,7 @@ void Application::run() {
 }
 
 bool Application::handle_input(int ch) {
-  log_debug("Got input: 0x%0x", ch);
+  // log_debug("Got input: 0x%0x", ch);
 
   if (ch == KEY_ENTER || ch == '\n') {
     return on_enter();
@@ -158,7 +158,7 @@ void Application::handle_down_key() {
   if (!state.select_next())
     return;
 
-  if (state.selected_entry == 1+state.window_bottom_file_index()) {
+  if (state.selected_entry == 1 + state.window_bottom_file_index()) {
     state.scroll_down();
   }
 }
@@ -167,7 +167,7 @@ void Application::handle_up_key() {
   if (!state.select_prev())
     return;
 
-  if (state.selected_entry == state.window_top_file_index()-1) {
+  if (state.selected_entry == state.window_top_file_index() - 1) {
     state.scroll_up();
   }
 }

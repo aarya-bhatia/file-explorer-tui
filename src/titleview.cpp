@@ -6,6 +6,10 @@
 #include <sys/param.h>
 #include <unistd.h>
 
+void TitleView::_init() {
+  titleline = get_login_username() + "@" + get_hostname() + " %";
+}
+
 void print_right_align(WINDOW *win, int line_no, char *text) {
   int width = getmaxx(win);
   size_t text_len = strlen(text);
@@ -20,7 +24,7 @@ void TitleView::render(const AppState &state) {
   werase(win);
   wmove(win, 0, 0);
 
-  wprintw(win, "%s@%s %% ", get_login_username().c_str(), get_hostname().c_str());
+  wprintw(win, "%s ", titleline.c_str());
 
   wattron(win, COLOR_PAIR(Colors::Blue) | A_BOLD);
   wprintw(win, "%s", state.cwd.c_str());
