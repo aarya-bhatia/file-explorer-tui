@@ -27,27 +27,47 @@ void Application::resize() {
   }
 
   state.resize(LINES, COLS);
-
   log_info("screen size: %d x %d", LINES, COLS);
+  init_views();
+}
+
+void Application::init_views() {
   erase();
   refresh();
 
-  views.push_back(std::make_unique<TitleView>(0, 0, 2, COLS));
+  views.clear();
+
+  std::unique_ptr<View> title_view = std::make_unique<TitleView>(0, 0, 1, COLS);
+  std::unique_ptr<View> cmdline_view =
+      std::make_unique<CmdLineView>(LINES - 1, 0, 1, COLS);
+  views.push_back(std::move(title_view));
+  views.push_back(std::move(cmdline_view));
 
   if (state.show_preview) {
-    views.push_back(
-        std::make_unique<FileListView>(2, 0, state.file_view_height, COLS / 2));
-
-    views.push_back(std::make_unique<FilePreviewView>(
-        2, COLS / 2, state.file_view_height, COLS - COLS / 2));
+    std::unique_ptr<FileListView> filelist_view =
+        std::make_unique<FileListView>(2, 0, LINES - 2, COLS / 2);
+    std::unique_ptr<View> preview_view = std::make_unique<FilePreviewView>(
+        2, COLS / 2, LINES - 2, COLS - COLS / 2);
+    views.push_back(std::move(filelist_view));
+    views.push_back(std::move(preview_view));
   } else {
-    views.push_back(
-        std::make_unique<FileListView>(2, 0, state.file_view_height, COLS));
+    std::unique_ptr<FileListView> filelist_view =
+        std::make_unique<FileListView>(1, 0, LINES - 2, COLS);
+    views.push_back(std::move(filelist_view));
   }
 
-  views.push_back(std::make_unique<CmdLineView>(LINES - 1, 0, 1, COLS));
-
   helpview = std::make_unique<HelpView>(0, 0, LINES, COLS);
+}
+
+void Application::render() {
+  if (state.show_help_menu) {
+    helpview->render(state);
+  } else {
+    for (auto &view : views) {
+      view->render(state);
+    }
+  }
+  doupdate();
 }
 
 Application::~Application() {
@@ -57,14 +77,7 @@ Application::~Application() {
 
 void Application::run() {
   while (state.running) {
-    if (state.show_help_menu) {
-      helpview->render(state);
-    } else {
-      for (auto &view : views) {
-        view->render(state);
-      }
-    }
-    doupdate();
+    render();
     int ch = getch();
     if (ch == KEY_RESIZE) {
       resize();
@@ -145,7 +158,7 @@ void Application::handle_down_key() {
   if (!state.select_next())
     return;
 
-  if (state.selected_entry == state.window_bottom_file_index()) {
+  if (state.selected_entry == 1+state.window_bottom_file_index()) {
     state.scroll_down();
   }
 }
@@ -154,7 +167,7 @@ void Application::handle_up_key() {
   if (!state.select_prev())
     return;
 
-  if (state.selected_entry == state.window_top_file_index()) {
+  if (state.selected_entry == state.window_top_file_index()-1) {
     state.scroll_up();
   }
 }

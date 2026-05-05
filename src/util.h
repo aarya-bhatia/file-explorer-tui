@@ -34,3 +34,6 @@ void get_file_stat(const char *filepath, FileStat &st);
 std::string get_username(uid_t uid);
 std::string get_groupname(gid_t gid);
 std::string get_last_access_date(struct timespec &atime);
+
+std::string get_hostname();
+std::string get_login_username();

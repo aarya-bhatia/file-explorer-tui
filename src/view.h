@@ -1,6 +1,5 @@
 #pragma once
 #include "app_state.h"
-#include "util.h"
 #include <ncurses.h>
 
 class View {

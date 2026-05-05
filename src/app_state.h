@@ -23,8 +23,7 @@ struct AppState {
   int user_scroll = 0;
   bool show_preview = false;
 
-  int view_height, view_width;
-  int file_view_height;
+  int view_height, view_width, file_view_height;
 
   bool running = true;
   bool show_dotfiles = false;
@@ -87,8 +86,6 @@ struct AppState {
 
   int window_bottom_file_index() { return user_scroll + file_view_height - 1; }
 
-  int window_count_visible_files() { return files.size() - user_scroll; }
-
   void window_select_bottom_file() {
     selected_entry = window_bottom_file_index();
   }
@@ -100,19 +97,16 @@ struct AppState {
            index <= window_bottom_file_index();
   }
 
-  void scroll_down() { 
-    if (window_count_visible_files() < file_view_height) {
-      return;
+  void scroll_down() {
+    if(user_scroll + 1 < files.size()) {
+      user_scroll++;
+      log_debug("scrolled down to %d", user_scroll);
     }
-
-    assert(user_scroll < files.size());
-    user_scroll++;
-    log_debug("scrolled down to %d", user_scroll);
   }
 
-  void scroll_up() { 
-    if(user_scroll > 0) {
-      user_scroll--; 
+  void scroll_up() {
+    if (user_scroll > 0) {
+      user_scroll--;
       log_debug("scrolled up to %d", user_scroll);
     }
   }
@@ -120,6 +114,6 @@ struct AppState {
   void resize(int lines, int cols) {
     view_width = cols;
     view_height = lines;
-    file_view_height = lines - 3;
+    file_view_height = lines - 2;
   }
 };

@@ -26,8 +26,9 @@ void FileListView::render(const AppState &state) {
   if (state.files.empty()) {
     wprintw(win, "[Empty]");
   } else {
+    int file_view_height = getmaxy(win);
     for (int i = state.user_scroll;
-         i < std::min(state.file_view_height + state.user_scroll,
+         i < std::min(file_view_height + state.user_scroll,
                       (int)state.files.size());
          i++) {
       int y = i - state.user_scroll;

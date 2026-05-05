@@ -1,12 +1,13 @@
 #include "util.h"
-#include <errno.h>
 #include <grp.h>
+#include <limits.h>
 #include <pwd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#include <vector>
 
 void get_file_stat(const char *filepath, FileStat &filestat) {
   if (stat(filepath, &filestat.s) < 0) {
@@ -146,4 +147,22 @@ std::string get_groupname(gid_t gid) {
   }
   free(gbuf);
   return result;
+}
+
+std::string get_hostname() {
+  size_t bufsize = sysconf(_SC_HOST_NAME_MAX);
+  if (bufsize == -1)
+    bufsize = 255;
+  std::vector<char> buf(bufsize + 1);
+  if (gethostname(buf.data(), buf.size()) < 0) {
+    perror("gethostname");
+  }
+
+  buf.back() = 0;
+  return std::string(buf.data());
+}
+
+std::string get_login_username() {
+  uid_t uid = getuid(); // Get real User ID
+  return get_username(uid);
 }

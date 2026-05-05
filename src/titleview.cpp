@@ -19,8 +19,12 @@ void print_right_align(WINDOW *win, int line_no, char *text) {
 void TitleView::render(const AppState &state) {
   werase(win);
   wmove(win, 0, 0);
+
+  wprintw(win, "%s@%s %% ", get_login_username().c_str(), get_hostname().c_str());
+
   wattron(win, COLOR_PAIR(Colors::Blue) | A_BOLD);
-  wprintw(win, "$ %s", state.cwd.c_str());
+  wprintw(win, "%s", state.cwd.c_str());
+
   if (state.cwd != "/")
     wprintw(win, "/");
   wattroff(win, COLOR_PAIR(Colors::Blue) | A_BOLD);
