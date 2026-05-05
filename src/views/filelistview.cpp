@@ -19,10 +19,14 @@ void _draw_filename(WINDOW *win,
 }
 
 void FileListView::render(const AppState &state) {
-  if (state.selected_entry == _prev_sel && state.cwd == _prev_cwd) {
-    wnoutrefresh(win);
-    return;
+  if (!dirty) {
+    if (state.selected_entry == _prev_sel && state.cwd == _prev_cwd) {
+      wnoutrefresh(win);
+      return;
+    }
   }
+
+  dirty = false;
 
   _prev_sel = state.selected_entry;
   _prev_cwd = state.cwd;
