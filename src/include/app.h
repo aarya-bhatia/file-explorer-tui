@@ -1,6 +1,7 @@
 #pragma once
 
-#include "view.h"
+#include "../views/view.h"
+#include "../views/helpview.h"
 #include <memory>
 #include <vector>
 #include <ncurses.h>

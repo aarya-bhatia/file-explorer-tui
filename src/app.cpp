@@ -1,5 +1,10 @@
-#include "app.h"
+#include "include/app.h"
 #include "util.h"
+#include "views/cmdlineview.h"
+#include "views/filelistview.h"
+#include "views/filepreviewview.h"
+#include "views/headerview.h"
+#include "views/titleview.h"
 #include <memory>
 #include <ncurses.h>
 
@@ -37,26 +42,38 @@ void Application::init_views() {
 
   views.clear();
 
-  std::unique_ptr<View> title_view = std::make_unique<TitleView>(0, 0, 1, COLS);
-  std::unique_ptr<View> cmdline_view =
-      std::make_unique<CmdLineView>(LINES - 1, 0, 1, COLS);
+  std::unique_ptr<View> title_view = std::make_unique<TitleView>(
+      Rect{.begy = 0, .begx = 0, .nlines = 1, .ncols = COLS});
+
+  std::unique_ptr<View> cmdline_view = std::make_unique<CmdLineView>(
+      Rect{.begy = LINES - 1, .begx = 0, .nlines = 1, .ncols = COLS});
+
   views.push_back(std::move(title_view));
   views.push_back(std::move(cmdline_view));
 
   if (state.show_preview) {
     std::unique_ptr<FileListView> filelist_view =
-        std::make_unique<FileListView>(2, 0, LINES - 2, COLS / 2);
-    std::unique_ptr<View> preview_view = std::make_unique<FilePreviewView>(
-        2, COLS / 2, LINES - 2, COLS - COLS / 2);
+        std::make_unique<FileListView>(
+            Rect{.begy = 1, .begx = 0, .nlines = LINES - 2, .ncols = COLS / 2});
+
+    std::unique_ptr<View> preview_view =
+        std::make_unique<FilePreviewView>(Rect{.begy = 1,
+                                               .begx = COLS / 2,
+                                               .nlines = LINES - 2,
+                                               .ncols = COLS - COLS / 2});
+
     views.push_back(std::move(filelist_view));
     views.push_back(std::move(preview_view));
   } else {
     std::unique_ptr<FileListView> filelist_view =
-        std::make_unique<FileListView>(1, 0, LINES - 2, COLS);
+        std::make_unique<FileListView>(
+            Rect{.begy = 1, .begx = 0, .nlines = LINES - 2, .ncols = COLS});
+
     views.push_back(std::move(filelist_view));
   }
 
-  helpview = std::make_unique<HelpView>(0, 0, LINES, COLS);
+  helpview = std::make_unique<HelpView>(
+      Rect{.begy = 0, .begx = 0, .nlines = LINES, .ncols = COLS});
 }
 
 void Application::render() {

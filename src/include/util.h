@@ -1,9 +1,13 @@
 #pragma once
-#include "log.h"
 #include "cwalk.h"
+#include "log.h"
+#include <pwd.h>
 #include <string>
 #include <sys/stat.h>
-#include <pwd.h>
+
+struct Rect {
+  int begy, begx, nlines, ncols;
+};
 
 enum Colors { Red = 1, Blue, Green, Yellow };
 

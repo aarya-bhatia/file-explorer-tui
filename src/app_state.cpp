@@ -45,9 +45,6 @@ bool AppState::reload_file_list() {
         FileEntry::EntryType type = map_to_entry_type(entry->d_type);
         files.emplace_back(
             std::make_unique<FileEntry>(type, std::string(entry->d_name)));
-        const auto &fileentry = files.back();
-        // log_info("Added entry %s with type:%d", fileentry->filename.c_str(),
-        //            fileentry->type);
       }
     }
   }

@@ -1,6 +1,4 @@
-#include "app_state.h"
-#include "view.h"
-#include <ncurses.h>
+#include "helpview.h"
 
 void HelpView::render(const AppState &state) {
   werase(win);

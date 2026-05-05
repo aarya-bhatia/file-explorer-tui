@@ -1,6 +1,4 @@
-#include "app_state.h"
-#include "view.h"
-#include <ncurses.h>
+#include "cmdlineview.h"
 
 void CmdLineView::render(const AppState &state) {
   werase(win);
@@ -25,4 +23,3 @@ void CmdLineView::render(const AppState &state) {
   wnoutrefresh(win);
 }
 
-TitleView::TitleView(int y, int x, int h, int w) : View(y, x, h, w) { _init(); }

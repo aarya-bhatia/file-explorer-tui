@@ -1,6 +1,4 @@
-#include "app_state.h"
-#include "view.h"
-#include <ncurses.h>
+#include "filelistview.h"
 
 void _draw_filename(WINDOW *win,
                     const std::unique_ptr<AppState::FileEntry> &entry) {

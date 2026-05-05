@@ -1,7 +1,4 @@
-#include "app_state.h"
-#include "view.h"
-#include <ncurses.h>
-
+#include "headerview.h"
 void HeaderView::render(const AppState &state) {
   werase(win);
 

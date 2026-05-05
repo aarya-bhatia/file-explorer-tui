@@ -1,4 +1,4 @@
-#include "view.h"
+#include "filepreviewview.h"
 #include <cstdio>
 #include <cstring>
 #include <dirent.h>

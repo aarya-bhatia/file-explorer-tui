@@ -3,9 +3,16 @@ all: main
 SRC_FILES=$(shell find src -type f -name "*.cpp" -o -name "*.c")
 SRC_OBJECTS=$(SRC_FILES:src/%=obj/%.o)
 
+SRCS=$(shell find src -type f -name "*.cpp" -o -name "*.c")
+DEPS = $(SRCS:src/%=obj/%.d)
+-include $(DEPS)
+
+INC_DIR=$(shell find src -type d)
+INC_FLAGS=$(addprefix -I, $(INC_DIR))
+
 LDFLAGS=-lncurses -lm
-CXXFLAGS=-c -Wall -std=c++14 -Isrc/include
-CFLAGS=-c -Wall -std=c99 -Isrc/include
+CXXFLAGS=-c -Wall -std=c++14 -MMD -MP $(INC_FLAGS)
+CFLAGS=-c -Wall -std=c99 -MMD -MP $(INC_FLAGS)
 
 main: $(SRC_OBJECTS)
 	g++ $(LDFLAGS) $^ -o $@
