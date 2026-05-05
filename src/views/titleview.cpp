@@ -22,12 +22,5 @@ void TitleView::render(const AppState &state) {
     wprintw(win, "%s", state.get_selected_filename().substr(0, width()).c_str());
   }
 
-  if (state.files.size() > 0) {
-    char s[24] = {0};
-    snprintf(s, sizeof s - 1, "[%d/%lu]", 1 + state.selected_entry,
-             state.files.size());
-    print_right_align(0, s);
-  }
-
   wnoutrefresh(win);
 }

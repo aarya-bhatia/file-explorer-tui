@@ -20,6 +20,13 @@ void CmdLineView::render(const AppState &state) {
     wprintw(win, " %lu", s.s.st_size);
   }
 
+  if (state.files.size() > 0) {
+    char s[24] = {0};
+    snprintf(s, sizeof s - 1, "[%d/%lu]", 1 + state.selected_entry,
+             state.files.size());
+    print_right_align(0, s);
+  }
+
   wnoutrefresh(win);
 }
 
