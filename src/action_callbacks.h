@@ -6,11 +6,6 @@ struct ActionCallback {
   virtual ~ActionCallback() {}
 };
 
-struct CreateFileCallback: ActionCallback {
+struct CreateFileCallback : ActionCallback {
   bool run(AppState &state);
 };
-
-// struct RemoveFileCallback: ActionCallback {
-//   bool run(AppState &state);
-// };
-//

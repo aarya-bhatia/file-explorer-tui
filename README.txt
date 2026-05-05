@@ -12,3 +12,4 @@ TODO:
 - sort - sort strategy
 - consider std::filesystem api
 - future - readdir in background thread and load async
+- preview - async

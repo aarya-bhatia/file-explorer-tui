@@ -21,6 +21,7 @@ struct AppState {
   ~AppState();
 
   int user_scroll = 0;
+  bool show_preview = false;
 
   int view_height, view_width;
   int file_view_height;
@@ -106,10 +107,14 @@ struct AppState {
 
     assert(user_scroll < files.size());
     user_scroll++;
+    log_debug("scrolled down to %d", user_scroll);
   }
 
   void scroll_up() { 
-    if(user_scroll > 0) user_scroll--; 
+    if(user_scroll > 0) {
+      user_scroll--; 
+      log_debug("scrolled up to %d", user_scroll);
+    }
   }
 
   void resize(int lines, int cols) {
