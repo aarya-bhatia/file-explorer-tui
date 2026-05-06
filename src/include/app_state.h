@@ -13,7 +13,7 @@ struct AppState {
   int user_scroll = 0;
   bool show_preview = false;
 
-  int view_height, view_width, file_view_height;
+  int view_height, view_width, file_view_height=0;
 
   bool running = true;
   bool show_dotfiles = false;
@@ -104,6 +104,5 @@ struct AppState {
   void resize(int lines, int cols) {
     view_width = cols;
     view_height = lines;
-    file_view_height = lines - 2;
   }
 };

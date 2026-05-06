@@ -42,8 +42,13 @@ void Application::init_views() {
 
   views.clear();
 
+  views.push_back(std::make_unique<HeaderView>(
+      Rect{.begy = 0, .begx = 0, .nlines = 1, .ncols = COLS}));
+
   std::unique_ptr<View> title_view = std::make_unique<TitleView>(
-      Rect{.begy = 0, .begx = 0, .nlines = 1, .ncols = COLS});
+      Rect{.begy = 1, .begx = 0, .nlines = 1, .ncols = COLS});
+
+  state.file_view_height = LINES - 3;
 
   std::unique_ptr<View> cmdline_view = std::make_unique<CmdLineView>(
       Rect{.begy = LINES - 1, .begx = 0, .nlines = 1, .ncols = COLS});
@@ -54,12 +59,12 @@ void Application::init_views() {
   if (state.show_preview) {
     std::unique_ptr<FileListView> filelist_view =
         std::make_unique<FileListView>(
-            Rect{.begy = 1, .begx = 0, .nlines = LINES - 2, .ncols = COLS / 2});
+            Rect{.begy = 2, .begx = 0, .nlines = state.file_view_height, .ncols = COLS / 2});
 
     std::unique_ptr<View> preview_view =
-        std::make_unique<FilePreviewView>(Rect{.begy = 1,
+        std::make_unique<FilePreviewView>(Rect{.begy = 2,
                                                .begx = COLS / 2,
-                                               .nlines = LINES - 2,
+                                               .nlines = state.file_view_height,
                                                .ncols = COLS - COLS / 2});
 
     views.push_back(std::move(filelist_view));
@@ -67,7 +72,7 @@ void Application::init_views() {
   } else {
     std::unique_ptr<FileListView> filelist_view =
         std::make_unique<FileListView>(
-            Rect{.begy = 1, .begx = 0, .nlines = LINES - 2, .ncols = COLS});
+            Rect{.begy = 2, .begx = 0, .nlines = state.file_view_height, .ncols = COLS});
 
     views.push_back(std::move(filelist_view));
   }
