@@ -80,14 +80,15 @@ void Application::init_views()
   add_view([](Rect r)
            { return std::make_unique<TitleView>(r); }, 1);
 
+  state.file_view_height = get_unused_height() - 1;
+  log_debug("file view height: %d", state.file_view_height);
   add_view([](Rect r)
-           { return std::make_unique<FileListView>(r); }, get_unused_height() - 1);
+           { return std::make_unique<FileListView>(r); }, state.file_view_height);
 
   add_view([](Rect r)
            { return std::make_unique<CmdLineView>(r); }, 1);
 
   assert(views.size() == 3);
-  state.file_view_height = get_unused_height() - 1;
 
   helpview = std::make_unique<HelpView>(
       Rect{.begy = 0, .begx = 0, .nlines = LINES, .ncols = COLS});
