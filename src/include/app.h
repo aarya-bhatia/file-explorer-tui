@@ -1,12 +1,12 @@
 #pragma once
 
-#include "../views/view.h"
 #include "../views/helpview.h"
+#include "../views/view.h"
+#include "action_callbacks.h"
 #include <memory>
-#include <vector>
 #include <ncurses.h>
 #include <stdio.h>
-#include "action_callbacks.h"
+#include <vector>
 
 class Application {
 public:
@@ -14,21 +14,27 @@ public:
   ~Application();
   void run();
 
+  struct Input {
+    enum class Type {KEY, ENTER, BACKSPACE, CONTROL} type;
+    int val;
+  };
+
 private:
   AppState state;
   std::vector<std::unique_ptr<View>> views;
   std::unique_ptr<HelpView> helpview;
-  std::unique_ptr<ActionCallback> next_callback;  
+  std::unique_ptr<ActionCallback> next_callback;
 
   void resize();
   void render();
 
-  bool handle_input(int ch);
-  bool on_enter();
-  bool create_file_prompt();
-  void handle_down_key();
-  void handle_up_key();
+  Input convert_input(int ch);
+  void handle_input(Input &in);
+  void handle_input_typing(Input &in);
+  void handle_finish_typing();
+  void handle_user_command(const std::vector<std::string> &tokens);
+  void handle_enter_key();
+  void handle_input_key(int ch);
 
-  bool create_file_callback();
   void init_views();
 };

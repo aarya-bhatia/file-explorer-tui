@@ -5,8 +5,11 @@
 #include "views/filepreviewview.h"
 #include "views/headerview.h"
 #include "views/titleview.h"
+#include <cctype>
+#include <iterator>
 #include <memory>
 #include <ncurses.h>
+#include <sstream>
 
 Application::Application(const char *cwd) : state(cwd) {
   initscr();
@@ -26,13 +29,13 @@ Application::Application(const char *cwd) : state(cwd) {
 
 void Application::resize() {
   if (LINES < MIN_LINES || COLS < MIN_COLS) {
-    log_info("screen is too small (min: %d x %d)", MIN_LINES, MIN_COLS);
+    log_info("screen must be at least %d lines x %d cols", MIN_LINES, MIN_COLS);
     state.running = false;
     return;
   }
 
+  log_info("screen size: %d lines x %d cols", LINES, COLS);
   state.resize(LINES, COLS);
-  log_info("screen size: %d x %d", LINES, COLS);
   init_views();
 }
 
@@ -45,37 +48,23 @@ void Application::init_views() {
   views.push_back(std::make_unique<HeaderView>(
       Rect{.begy = 0, .begx = 0, .nlines = 1, .ncols = COLS}));
 
-  std::unique_ptr<View> title_view = std::make_unique<TitleView>(
-      Rect{.begy = 1, .begx = 0, .nlines = 1, .ncols = COLS});
+  views.push_back(std::make_unique<TitleView>(
+      Rect{.begy = 1, .begx = 0, .nlines = 1, .ncols = COLS}));
 
-  state.file_view_height = LINES - 3;
+  views.push_back(std::make_unique<CmdLineView>(
+      Rect{.begy = LINES - 1, .begx = 0, .nlines = 1, .ncols = COLS}));
 
-  std::unique_ptr<View> cmdline_view = std::make_unique<CmdLineView>(
-      Rect{.begy = LINES - 1, .begx = 0, .nlines = 1, .ncols = COLS});
+  int h_avail = LINES;
+  for(auto &view: views) h_avail -= view->height();
+  state.file_view_height = h_avail;
 
-  views.push_back(std::move(title_view));
-  views.push_back(std::move(cmdline_view));
+  std::unique_ptr<FileListView> filelist_view =
+      std::make_unique<FileListView>(Rect{.begy = 2,
+                                          .begx = 0,
+                                          .nlines = state.file_view_height,
+                                          .ncols = COLS});
 
-  if (state.show_preview) {
-    std::unique_ptr<FileListView> filelist_view =
-        std::make_unique<FileListView>(
-            Rect{.begy = 2, .begx = 0, .nlines = state.file_view_height, .ncols = COLS / 2});
-
-    std::unique_ptr<View> preview_view =
-        std::make_unique<FilePreviewView>(Rect{.begy = 2,
-                                               .begx = COLS / 2,
-                                               .nlines = state.file_view_height,
-                                               .ncols = COLS - COLS / 2});
-
-    views.push_back(std::move(filelist_view));
-    views.push_back(std::move(preview_view));
-  } else {
-    std::unique_ptr<FileListView> filelist_view =
-        std::make_unique<FileListView>(
-            Rect{.begy = 2, .begx = 0, .nlines = state.file_view_height, .ncols = COLS});
-
-    views.push_back(std::move(filelist_view));
-  }
+  views.push_back(std::move(filelist_view));
 
   helpview = std::make_unique<HelpView>(
       Rect{.begy = 0, .begx = 0, .nlines = LINES, .ncols = COLS});
@@ -97,6 +86,39 @@ Application::~Application() {
   endwin();
 }
 
+Application::Input Application::convert_input(int ch) {
+  Input in;
+  in.val = 0;
+
+  switch (ch) {
+  case KEY_ENTER:
+  case '\n':
+    in.type = Input::Type::ENTER;
+    log_debug("input: <cr>");
+    break;
+
+  case KEY_BACKSPACE:
+  case 127:
+  case '\b':
+    in.type = Input::Type::BACKSPACE;
+    log_debug("input: <bs>");
+    break;
+
+  default:
+    if (isprint(ch)) {
+      in.type = Input::Type::KEY;
+      in.val = ch;
+      log_debug("input: %c", in.val);
+    } else if (iscntrl(ch)) {
+      in.type = Input::Type::CONTROL;
+      in.val = ch & 0x1f;
+      log_debug("input: ctrl+%c", in.val);
+    }
+  }
+
+  return in;
+}
+
 void Application::run() {
   while (state.running) {
     render();
@@ -107,135 +129,108 @@ void Application::run() {
     } else if (ch == KEY_F(1)) {
       return;
     }
-    if (!handle_input(ch)) {
-      log_info("Failed to handle action for key 0x%x", ch);
-    }
+
+    Input in = convert_input(ch);
+    handle_input(in);
   }
 }
 
-bool Application::handle_input(int ch) {
-  // log_debug("Got input: 0x%0x", ch);
+void Application::handle_finish_typing() {
+  state.typing = false;
+  std::istringstream iss(state.cmdline_input);
+  state.cmdline_input.clear();
+  std::vector<std::string> tokens((std::istream_iterator<std::string>(iss)),
+                                  std::istream_iterator<std::string>());
+  handle_user_command(tokens);
+}
 
-  if (ch == KEY_ENTER || ch == '\n') {
-    return on_enter();
+void Application::handle_input_typing(Input &input) {
+  if (!state.typing) {
+    return;
   }
 
-  if (state.typing) {
-    if (ch == KEY_BACKSPACE || ch == 127 || ch == '\b') {
-      if (!state.cmdline_input.empty())
-        state.cmdline_input.pop_back();
-    } else if (ch == CTRL('u')) {
+  switch (input.type) {
+  case Input::Type::KEY:
+    state.cmdline_input += input.val;
+    break;
+
+  case Input::Type::ENTER:
+    handle_finish_typing();
+    break;
+
+  case Input::Type::BACKSPACE:
+    if (!state.cmdline_input.empty())
+      state.cmdline_input.pop_back();
+    break;
+
+  case Input::Type::CONTROL:
+    if (input.val == 'u') {
       state.cmdline_input.clear();
-    } else if (isprint(ch)) {
-      state.cmdline_input += ch;
-    } else {
-      log_info("illegal input character");
     }
-    return true;
+    break;
+  }
+}
+
+void Application::handle_input(Input &input) {
+  if (state.is_typing()) {
+    handle_input_typing(input);
+    return;
   }
 
-  if (ch == 'q') {
-    log_info("Stopping application...");
-    state.running = false;
-    return true;
-  }
+  switch (input.type) {
+  case Input::Type::ENTER:
+    state.open_selected_entry();
+    break;
 
-  if (ch == '?') {
-    log_info("Opening help menu...");
-    state.show_help_menu = !state.show_help_menu;
-    return true;
-  }
+  case Input::Type::BACKSPACE:
+    break;
 
-  if (ch == 'k') {
-    handle_up_key();
-    return true;
-  }
+  case Input::Type::CONTROL:
+    if (input.val == 'l') {
+      state.toggle_show_status();
+    }
+    break;
 
-  if (ch == 'j') {
-    handle_down_key();
-    return true;
+  case Input::Type::KEY:
+    handle_input_key(input.val);
+    break;
   }
+}
 
-  if (ch == '-') {
-    log_info("Opening parent directory...");
+void Application::handle_input_key(int ch) {
+  switch (ch) {
+  case 'q':
+    state.quit();
+    break;
+
+  case '?':
+    state.toggle_show_help();
+    break;
+
+  case 'k':
+    state.handle_up_key();
+    break;
+
+  case 'j':
+    state.handle_down_key();
+    break;
+
+  case '-':
     state.open_parent_directory();
-    return true;
-  }
+    break;
 
-  if (ch == 'o') {
-    log_info("Create file request...");
-    return create_file_prompt();
-  }
+  case 'L':
+    state.select_bottom_entry();
+    break;
 
-  if (ch == CTRL('l')) {
-    log_info("clearing statusline...");
-    state.statushidden = !state.statushidden;
-    return true;
-  }
+  case 'H':
+    state.select_top_entry();
+    break;
 
-  if (ch == 'L') {
-    state.selected_entry = state.window_bottom_file_index();
-    return true;
-  }
-
-  if (ch == 'H') {
-    state.selected_entry = state.window_top_file_index();
-    return true;
-  }
-
-  if (ch == 'M') {
-    state.selected_entry =
-        (state.window_bottom_file_index() - state.window_top_file_index()) / 2;
-    return true;
-  }
-
-  return false;
-}
-
-void Application::handle_down_key() {
-  if (!state.select_next())
-    return;
-
-  if (state.selected_entry == 1 + state.window_bottom_file_index()) {
-    state.scroll_down();
+  case 'M':
+    state.select_middle_entry();
+    break;
   }
 }
 
-void Application::handle_up_key() {
-  if (!state.select_prev())
-    return;
-
-  if (state.selected_entry == state.window_top_file_index() - 1) {
-    state.scroll_up();
-  }
-}
-
-bool Application::create_file_prompt() {
-  state.typing = true;
-  state.prompt = "Enter file name >";
-  state.cmdline_input = "";
-  next_callback = std::make_unique<CreateFileCallback>();
-  return true;
-}
-
-bool Application::on_enter() {
-  if (state.typing) {
-    log_info("Running callback...");
-    if (!next_callback) {
-      log_info("ERROR callback is null");
-    } else {
-      next_callback->run(state);
-      state.typing = false;
-      state.prompt = "";
-      state.cmdline_input = "";
-      next_callback = nullptr;
-    }
-  } else {
-    log_info("Opening directory...");
-    if (!state.enter_directory()) {
-      log_info("Failed to open directory: %s",
-               state.get_selected_filename().c_str());
-    }
-  }
-  return true;
-}
+void Application::handle_user_command(const std::vector<std::string> &tokens) {}
