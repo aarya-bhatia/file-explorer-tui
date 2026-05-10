@@ -1,4 +1,4 @@
-all: main
+all: files
 
 SRC_FILES=$(shell find src -type f -name "*.cpp" -o -name "*.c")
 SRC_OBJECTS=$(SRC_FILES:src/%=obj/%.o)
@@ -14,7 +14,7 @@ LDFLAGS=-lncurses -lm
 CXXFLAGS=-c -Wall -std=c++17 -MMD -MP $(INC_FLAGS)
 CFLAGS=-c -Wall -std=c99 -MMD -MP $(INC_FLAGS)
 
-main: $(SRC_OBJECTS)
+files: $(SRC_OBJECTS)
 	g++ $(LDFLAGS) $^ -o $@
 
 obj/%.cpp.o: src/%.cpp
@@ -26,5 +26,5 @@ obj/%.c.o: src/%.c
 	gcc $(CFLAGS) $< -o $@
 
 clean:
-	rm -rf main obj/
+	rm -rf files obj/
 
