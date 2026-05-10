@@ -1,22 +1,36 @@
 #include "cmdlineview.h"
 
-void CmdLineView::render(const AppState &state) {
+void CmdLineView::render(const AppState &state)
+{
   werase(win);
   wmove(win, 0, 0);
 
-  if (strlen(state.prompt) > 0) {
-    wprintw(win, state.prompt);
-  } else {
-    print_file_stat(state);
+  if (!state.statushidden)
+  {
+    wprintw(win, "%s", state.statusline.c_str());
+    wnoutrefresh(win);
+    return;
   }
 
-  print_file_index(state);
+  switch (state.mode)
+  {
+  case AppState::Mode::Normal:
+    print_file_stat(state);
+    print_file_index(state);
+    break;
+  case AppState::Mode::Command:
+    wprintw(win, ":%s", state.cmdline_input.c_str());
+    break;
+  case AppState::Mode::Search:
+    wprintw(win, "/%s", state.cmdline_input.c_str());
+    break;
+  }
 
-  wmove(win, 1, 0);
   wnoutrefresh(win);
 }
 
-void CmdLineView::print_file_stat(const AppState &state) {
+void CmdLineView::print_file_stat(const AppState &state)
+{
   const std::string &selected_filename = state.get_selected_filename();
   FileStat s{};
   get_file_stat((state.cwd + "/" + selected_filename).c_str(), s);
@@ -28,19 +42,13 @@ void CmdLineView::print_file_stat(const AppState &state) {
   wprintw(win, " %lu", s.s.st_size);
 }
 
-void CmdLineView::print_file_index(const AppState &state) {
-  if (state.files.size() > 0) {
+void CmdLineView::print_file_index(const AppState &state)
+{
+  if (state.files.size() > 0)
+  {
     char s[24] = {0};
     snprintf(s, sizeof s - 1, "[%d/%lu]", 1 + state.selected_entry,
              state.files.size());
     print_right_align(0, s);
   }
 }
-
-void CmdLineView::print_cmd_prompt(const AppState &state)
-{
-  if (!state.cmdline_input.empty()) {
-    wprintw(win, ":%s", state.cmdline_input.c_str());
-  }
-}
-

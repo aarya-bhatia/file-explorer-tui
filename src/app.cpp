@@ -11,7 +11,8 @@
 #include <ncurses.h>
 #include <sstream>
 
-Application::Application(const char *cwd) : state(cwd) {
+Application::Application(const char *cwd) : state(cwd)
+{
   initscr();
   cbreak();
   noecho();
@@ -27,8 +28,10 @@ Application::Application(const char *cwd) : state(cwd) {
   resize();
 }
 
-void Application::resize() {
-  if (LINES < MIN_LINES || COLS < MIN_COLS) {
+void Application::resize()
+{
+  if (LINES < MIN_LINES || COLS < MIN_COLS)
+  {
     log_info("screen must be at least %d lines x %d cols", MIN_LINES, MIN_COLS);
     state.running = false;
     return;
@@ -39,58 +42,86 @@ void Application::resize() {
   init_views();
 }
 
-void Application::init_views() {
+bool Application::add_view(std::function<std::unique_ptr<View>(Rect r)> makeview, int req_h)
+{
+  if (req_h < 1)
+    return false;
+
+  int y = 0;
+  for (auto &view : views)
+  {
+    y += view->height();
+  }
+  if (y + req_h > LINES)
+  {
+    return false;
+  }
+  views.push_back(makeview(Rect{.begy = y, .begx = 0, .nlines = req_h, .ncols = COLS}));
+  return true;
+}
+
+int Application::get_unused_height()
+{
+  int h = 0;
+  for (auto &view : views)
+  {
+    h += view->height();
+  }
+  return LINES - h;
+}
+
+void Application::init_views()
+{
   erase();
   refresh();
 
   views.clear();
 
-  views.push_back(std::make_unique<HeaderView>(
-      Rect{.begy = 0, .begx = 0, .nlines = 1, .ncols = COLS}));
+  add_view([](Rect r)
+           { return std::make_unique<TitleView>(r); }, 1);
 
-  views.push_back(std::make_unique<TitleView>(
-      Rect{.begy = 1, .begx = 0, .nlines = 1, .ncols = COLS}));
+  add_view([](Rect r)
+           { return std::make_unique<FileListView>(r); }, get_unused_height() - 1);
 
-  views.push_back(std::make_unique<CmdLineView>(
-      Rect{.begy = LINES - 1, .begx = 0, .nlines = 1, .ncols = COLS}));
+  add_view([](Rect r)
+           { return std::make_unique<CmdLineView>(r); }, 1);
 
-  int h_avail = LINES;
-  for(auto &view: views) h_avail -= view->height();
-  state.file_view_height = h_avail;
-
-  std::unique_ptr<FileListView> filelist_view =
-      std::make_unique<FileListView>(Rect{.begy = 2,
-                                          .begx = 0,
-                                          .nlines = state.file_view_height,
-                                          .ncols = COLS});
-
-  views.push_back(std::move(filelist_view));
+  assert(views.size() == 3);
+  state.file_view_height = get_unused_height() - 1;
 
   helpview = std::make_unique<HelpView>(
       Rect{.begy = 0, .begx = 0, .nlines = LINES, .ncols = COLS});
 }
 
-void Application::render() {
-  if (state.show_help_menu) {
+void Application::render()
+{
+  if (state.show_help_menu)
+  {
     helpview->render(state);
-  } else {
-    for (auto &view : views) {
+  }
+  else
+  {
+    for (auto &view : views)
+    {
       view->render(state);
     }
   }
   doupdate();
 }
 
-Application::~Application() {
+Application::~Application()
+{
   log_info("exiting ncurses");
   endwin();
 }
 
-Application::Input Application::convert_input(int ch) {
+Application::Input Application::convert_input(int ch)
+{
   Input in;
   in.val = 0;
 
-  switch (ch) {
+  switch (ch)
+  {
   case KEY_ENTER:
   case '\n':
     in.type = Input::Type::ENTER;
@@ -105,28 +136,36 @@ Application::Input Application::convert_input(int ch) {
     break;
 
   default:
-    if (isprint(ch)) {
+    if (isprint(ch))
+    {
       in.type = Input::Type::KEY;
       in.val = ch;
       log_debug("input: %c", in.val);
-    } else if (iscntrl(ch)) {
+    }
+    else if (iscntrl(ch))
+    {
       in.type = Input::Type::CONTROL;
-      in.val = ch & 0x1f;
-      log_debug("input: ctrl+%c", in.val);
+      in.val = ch;
+      log_debug("input: %s", keyname(ch));
     }
   }
 
   return in;
 }
 
-void Application::run() {
-  while (state.running) {
+void Application::run()
+{
+  while (state.running)
+  {
     render();
     int ch = getch();
-    if (ch == KEY_RESIZE) {
+    if (ch == KEY_RESIZE)
+    {
       resize();
       continue;
-    } else if (ch == KEY_F(1)) {
+    }
+    else if (ch == KEY_F(1))
+    {
       return;
     }
 
@@ -135,21 +174,33 @@ void Application::run() {
   }
 }
 
-void Application::handle_finish_typing() {
+void Application::handle_start_typing()
+{
+  state.typing = true;
+  state.cmdline_input = "";
+}
+
+void Application::handle_finish_typing()
+{
   state.typing = false;
+  state.mode = AppState::Mode::Normal;
+  if (state.cmdline_input.empty())
+    return;
   std::istringstream iss(state.cmdline_input);
-  state.cmdline_input.clear();
   std::vector<std::string> tokens((std::istream_iterator<std::string>(iss)),
                                   std::istream_iterator<std::string>());
   handle_user_command(tokens);
 }
 
-void Application::handle_input_typing(Input &input) {
-  if (!state.typing) {
+void Application::handle_input_typing(Input &input)
+{
+  if (!state.typing)
+  {
     return;
   }
 
-  switch (input.type) {
+  switch (input.type)
+  {
   case Input::Type::KEY:
     state.cmdline_input += input.val;
     break;
@@ -161,23 +212,29 @@ void Application::handle_input_typing(Input &input) {
   case Input::Type::BACKSPACE:
     if (!state.cmdline_input.empty())
       state.cmdline_input.pop_back();
+    else
+      handle_finish_typing();
     break;
 
   case Input::Type::CONTROL:
-    if (input.val == 'u') {
+    if (input.val == CTRL('u'))
+    {
       state.cmdline_input.clear();
     }
     break;
   }
 }
 
-void Application::handle_input(Input &input) {
-  if (state.is_typing()) {
+void Application::handle_input(Input &input)
+{
+  if (state.is_typing())
+  {
     handle_input_typing(input);
     return;
   }
 
-  switch (input.type) {
+  switch (input.type)
+  {
   case Input::Type::ENTER:
     state.open_selected_entry();
     break;
@@ -186,7 +243,8 @@ void Application::handle_input(Input &input) {
     break;
 
   case Input::Type::CONTROL:
-    if (input.val == 'l') {
+    if (input.val == CTRL('l'))
+    {
       state.toggle_show_status();
     }
     break;
@@ -197,8 +255,10 @@ void Application::handle_input(Input &input) {
   }
 }
 
-void Application::handle_input_key(int ch) {
-  switch (ch) {
+void Application::handle_input_key(int ch)
+{
+  switch (ch)
+  {
   case 'q':
     state.quit();
     break;
@@ -230,7 +290,27 @@ void Application::handle_input_key(int ch) {
   case 'M':
     state.select_middle_entry();
     break;
+
+  case ':':
+    handle_start_typing();
+    state.mode = AppState::Mode::Command;
+    break;
+
+  case '/':
+    handle_start_typing();
+    state.mode = AppState::Mode::Search;
+    break;
   }
 }
 
-void Application::handle_user_command(const std::vector<std::string> &tokens) {}
+void Application::handle_user_command(const std::vector<std::string> &tokens)
+{
+  if (tokens.size() == 0)
+    return;
+
+  if (tokens[0] == "pwd")
+  {
+    state.statusline = state.cwd;
+    state.statushidden = false;
+  }
+}

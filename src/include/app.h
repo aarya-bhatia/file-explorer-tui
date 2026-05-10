@@ -5,17 +5,28 @@
 #include "action_callbacks.h"
 #include <memory>
 #include <ncurses.h>
+#include <functional>
 #include <stdio.h>
 #include <vector>
 
-class Application {
+class Application
+{
 public:
   Application(const char *cwd = NULL);
   ~Application();
   void run();
+  void resize();
+  void render();
 
-  struct Input {
-    enum class Type {KEY, ENTER, BACKSPACE, CONTROL} type;
+  struct Input
+  {
+    enum class Type
+    {
+      KEY,
+      ENTER,
+      BACKSPACE,
+      CONTROL
+    } type;
     int val;
   };
 
@@ -25,16 +36,16 @@ private:
   std::unique_ptr<HelpView> helpview;
   std::unique_ptr<ActionCallback> next_callback;
 
-  void resize();
-  void render();
+  void init_views();
+  bool add_view(std::function<std::unique_ptr<View>(Rect)> makeview, int req_h);
+  int get_unused_height();
 
   Input convert_input(int ch);
   void handle_input(Input &in);
   void handle_input_typing(Input &in);
+  void handle_start_typing();
   void handle_finish_typing();
   void handle_user_command(const std::vector<std::string> &tokens);
   void handle_enter_key();
   void handle_input_key(int ch);
-
-  void init_views();
 };

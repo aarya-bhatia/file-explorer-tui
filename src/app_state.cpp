@@ -7,6 +7,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include "cwalk.h"
 
 AppState::~AppState() {}
 
@@ -15,13 +16,18 @@ AppState::AppState(const char *_cwd) {
     if (!init()) {
       log_info("Failed to initialize AppState");
       running = false;
+      return;
     }
   } else {
     cwd = std::string(_cwd);
     if (!reload_file_list()) {
+      log_info("Failed to initialize AppState");
       running = false;
+      return;
     }
   }
+
+  log_debug("Initialized AppState with cwd: %s", cwd.c_str());
 }
 
 bool AppState::reload_file_list() {
@@ -82,12 +88,19 @@ bool AppState::enter_directory() {
 }
 
 bool AppState::open_parent_directory() {
-  char s[1024];
-  strncpy(s, cwd.c_str(), sizeof s - 1);
-  s[sizeof(s) - 1] = '\0';
-  const char *dname = dirname(s);
-  std::string dname_s = dname;
-  return open_directory(dname_s);
+  size_t n = 0;
+  cwk_path_get_dirname(cwd.c_str(), &n);
+  cwd = cwd.substr(0, n);
+  log_debug("changed cwd: %s", cwd.c_str());
+
+  // char s[1024];
+  // strncpy(s, cwd.c_str(), sizeof s - 1);
+  // s[sizeof(s) - 1] = '\0';
+  // const char *dname = dirname(s);
+  // std::string dname_s = dname;
+  // return open_directory(dname_s);
+
+  return open_directory(cwd);
 }
 
 bool AppState::open_directory(std::string &path) {
