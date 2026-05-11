@@ -1,4 +1,5 @@
 #pragma once
+#include "cwalk.h"
 #include "file.h"
 #include "util.h"
 #include <assert.h>
@@ -81,7 +82,9 @@ struct AppState
 
   std::string get_selected_filepath() const
   {
-    return cwd + "/" + files[selected_entry]->filename;
+    std::vector<char> buf(cwd.size() + files[selected_entry]->filename.size() + 2);
+    cwk_path_join(cwd.c_str(), files[selected_entry]->filename.c_str(), buf.data(), buf.size());
+    return buf.data();
   }
 
   void find_and_select(const std::string &filepath)

@@ -7,7 +7,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include "cwalk.h"
+#include "include/cwalk.h"
 
 AppState::~AppState() {}
 
@@ -91,15 +91,10 @@ bool AppState::open_parent_directory() {
   size_t n = 0;
   cwk_path_get_dirname(cwd.c_str(), &n);
   cwd = cwd.substr(0, n);
+  // std::vector<char> buf(cwd.size() + 1);
+  // cwk_path_normalize(cwd.c_str(), buf.data(), buf.size());
+  // cwd = buf.data();
   log_debug("changed cwd: %s", cwd.c_str());
-
-  // char s[1024];
-  // strncpy(s, cwd.c_str(), sizeof s - 1);
-  // s[sizeof(s) - 1] = '\0';
-  // const char *dname = dirname(s);
-  // std::string dname_s = dname;
-  // return open_directory(dname_s);
-
   return open_directory(cwd);
 }
 
