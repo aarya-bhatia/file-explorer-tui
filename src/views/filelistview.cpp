@@ -40,12 +40,10 @@ void FileListView::render(const AppState &state) {
       wmove(win, y, 0);
       const auto &entry = state.files[i];
       if (i == state.selected_entry) {
-        wattron(win, COLOR_PAIR(Colors::Green));
-        wprintw(win, ">");
+        wattron(win, COLOR_PAIR(0) | A_REVERSE);
         _draw_filename(win, entry);
-        wattroff(win, COLOR_PAIR(Colors::Green));
+        wattroff(win, COLOR_PAIR(0) | A_REVERSE);
       } else {
-        wprintw(win, " ");
         _draw_filename(win, entry);
       }
     }
