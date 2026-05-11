@@ -9,6 +9,7 @@ TODO:
 - consider std::filesystem api
 - future - readdir in background thread and load async
 - preview - async
+- reset selected entry when resize hides it
 
 Optional(refactor):
 - move file logic to FileNavigator class
