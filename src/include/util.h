@@ -3,6 +3,7 @@
 #include <string>
 #include <sys/stat.h>
 
+
 struct Rect {
   int begy, begx, nlines, ncols;
 };
@@ -22,3 +23,5 @@ void get_human_size(size_t value, char *buffer, size_t n);
 const char *rstrstr(const char *str, const char *substr);
 
 bool get_system_cwd(std::string &result);
+
+void log_printf(const char *format, ...);

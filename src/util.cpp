@@ -1,4 +1,6 @@
 #include "util.h"
+#include <cstdarg>
+#include <cstdio>
 #include <grp.h>
 #include <limits.h>
 #include <pwd.h>
@@ -8,6 +10,17 @@
 #include <time.h>
 #include <unistd.h>
 #include <vector>
+
+void log_printf(const char *format, ...) {
+  if (strlen(format) == 0)
+    return;
+  va_list args;
+  va_start(args, format);
+  vfprintf(stderr, format, args);
+  va_end(args);
+  if (format[strlen(format) - 1] != '\n')
+    fputc('\n', stderr);
+}
 
 bool get_system_cwd(std::string &result) {
   char *buf = NULL;

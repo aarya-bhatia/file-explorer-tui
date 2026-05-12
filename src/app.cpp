@@ -26,12 +26,12 @@ Application::Application(const char *cwd) : state(cwd) {
 
 void Application::resize() {
   if (LINES < MIN_LINES || COLS < MIN_COLS) {
-    log_info("screen must be at least %d lines x %d cols", MIN_LINES, MIN_COLS);
+    log_printf("ERROR screen must be at least %d lines x %d cols", MIN_LINES, MIN_COLS);
     state.running = false;
     return;
   }
 
-  log_info("screen size: %d lines x %d cols", LINES, COLS);
+  log_printf("screen size: %d lines x %d cols", LINES, COLS);
   state.resize(LINES, COLS);
   init_views();
 
@@ -75,7 +75,7 @@ void Application::init_views() {
   add_view([](Rect r) { return std::make_unique<TitleView>(r); }, 1);
 
   state.file_view_height = get_unused_height() - 1;
-  log_debug("file view height: %d", state.file_view_height);
+  log_printf("file view height: %d", state.file_view_height);
   add_view([](Rect r) { return std::make_unique<FileListView>(r); },
            state.file_view_height);
 
@@ -99,7 +99,7 @@ void Application::render() {
 }
 
 Application::~Application() {
-  log_info("exiting ncurses");
+  log_printf("exiting ncurses");
   endwin();
 }
 
@@ -111,25 +111,25 @@ Application::Input Application::convert_input(int ch) {
   case KEY_ENTER:
   case '\n':
     in.type = Input::Type::ENTER;
-    log_debug("input: <cr>");
+    log_printf("input: <cr>");
     break;
 
   case KEY_BACKSPACE:
   case 127:
   case '\b':
     in.type = Input::Type::BACKSPACE;
-    log_debug("input: <bs>");
+    log_printf("input: <bs>");
     break;
 
   default:
     if (isprint(ch)) {
       in.type = Input::Type::KEY;
       in.val = ch;
-      log_debug("input: %c", in.val);
+      log_printf("input: %c", in.val);
     } else if (iscntrl(ch)) {
       in.type = Input::Type::CONTROL;
       in.val = ch;
-      log_debug("input: %s", keyname(ch));
+      log_printf("input: %s", keyname(ch));
     }
   }
 
@@ -138,7 +138,7 @@ Application::Input Application::convert_input(int ch) {
 
 void Application::run() {
   while (state.running) {
-    log_debug("Drawing application...");
+    log_printf("Drawing application...");
     render();
     int ch = getch();
     if (ch == KEY_RESIZE) {
@@ -206,7 +206,7 @@ void Application::handle_input(Input &input) {
 
   switch (input.type) {
   case Input::Type::ENTER:
-    log_debug("Opening selected entry");
+    log_printf("Opening selected entry");
     state.open_selected_entry();
     break;
 

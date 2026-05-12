@@ -1,7 +1,6 @@
 #pragma once
 #include "cwalk.h"
 #include "file.h"
-#include "log.h"
 #include "util.h"
 #include <assert.h>
 #include <functional>
@@ -46,7 +45,7 @@ struct AppState {
   bool select_prev() {
     if (selected_entry > 0) {
       selected_entry--;
-      log_debug("selected %d", selected_entry);
+      log_printf("selected %d", selected_entry);
       return true;
     }
     return false;
@@ -55,7 +54,7 @@ struct AppState {
   bool select_next() {
     if (selected_entry + 1 < files.size()) {
       selected_entry++;
-      log_debug("selected %d", selected_entry);
+      log_printf("selected %d", selected_entry);
       return true;
     }
     return false;
@@ -103,14 +102,14 @@ struct AppState {
   void scroll_down() {
     if (user_scroll + 1 < files.size()) {
       user_scroll++;
-      log_debug("scrolled down to %d", user_scroll);
+      log_printf("scrolled down to %d", user_scroll);
     }
   }
 
   void scroll_up() {
     if (user_scroll > 0) {
       user_scroll--;
-      log_debug("scrolled up to %d", user_scroll);
+      log_printf("scrolled up to %d", user_scroll);
     }
   }
 
@@ -127,17 +126,17 @@ struct AppState {
 
   void select_bottom_entry() {
     selected_entry = bottom_entry_index();
-    log_debug("selected %d", selected_entry);
+    log_printf("selected %d", selected_entry);
   }
 
   void select_top_entry() {
     selected_entry = top_entry_index();
-    log_debug("selected %d", selected_entry);
+    log_printf("selected %d", selected_entry);
   }
 
   void select_middle_entry() {
     selected_entry = (bottom_entry_index() - top_entry_index()) / 2;
-    log_debug("selected %d", selected_entry);
+    log_printf("selected %d", selected_entry);
   }
 
   void handle_up_key() {

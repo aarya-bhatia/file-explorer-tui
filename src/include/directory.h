@@ -1,7 +1,6 @@
 #pragma once
 #include "file.h"
 #include <memory>
-#include "log.h"
 #include <cassert>
 #include <dirent.h>
 #include <string>
@@ -15,7 +14,7 @@ public:
   Directory(const std::string &_path) : path(_path) {
     dirp = opendir(path.c_str());
     if (!dirp) {
-      log_error("opendir(): %s", std::strerror(errno));
+      log_printf("ERROR opendir(): %s", std::strerror(errno));
     }
   }
 

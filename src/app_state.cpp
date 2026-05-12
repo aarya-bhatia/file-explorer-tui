@@ -12,7 +12,7 @@ AppState::AppState(const char *start_cwd) {
   if (start_cwd) {
     cwd = start_cwd;
   } else if (!get_system_cwd(cwd)) {
-    log_info("invalid cwd");
+    log_printf("invalid cwd");
     running = false;
     return;
   }
@@ -22,7 +22,7 @@ AppState::AppState(const char *start_cwd) {
   }
 
   selected_entry = 0;
-  log_debug("Initialized AppState with cwd: %s", cwd.c_str());
+  log_printf("Initialized AppState with cwd: %s", cwd.c_str());
 }
 
 bool AppState::open_directory(const std::string &path) {
@@ -34,8 +34,8 @@ bool AppState::open_directory(const std::string &path) {
   cwd = path;
 
   files.clear();
-  log_info("cwd:%s", cwd.c_str());
+  log_printf("cwd:%s", cwd.c_str());
   d.list(files);
-  log_info("Total files: %ld", files.size());
+  log_printf("Total files: %ld", files.size());
   return true;
 }
