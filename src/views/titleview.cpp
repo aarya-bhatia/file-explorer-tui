@@ -1,4 +1,5 @@
 #include "titleview.h"
+#include "cwalk.h"
 
 TitleView::TitleView(Rect r) : View(r) { _init(); }
 

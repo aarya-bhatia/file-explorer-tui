@@ -30,7 +30,7 @@ bool CreateFileCallback::run(AppState &state) {
     if (mkdir(filepath.c_str(), 0777) < 0) {
       perror("mkdir");
       state.statusline = "Failed to create directory " + filepath;
-      state.find_and_select(filepath);
+      // state.find_and_select(filepath);
     } else {
       state.reload();
       state.statusline = "successfully created directory " + filepath;
@@ -44,7 +44,7 @@ bool CreateFileCallback::run(AppState &state) {
     } else {
       close(fd);
       state.reload();
-      state.find_and_select(filepath);
+      // state.find_and_select(filepath);
       state.statusline = "successfully created file " + filepath;
     }
   }

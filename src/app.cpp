@@ -32,7 +32,6 @@ void Application::resize() {
   }
 
   log_printf("screen size: %d lines x %d cols", LINES, COLS);
-  state.resize(LINES, COLS);
   init_views();
 
   if (!state.is_entry_visible(state.selected_entry)) {
