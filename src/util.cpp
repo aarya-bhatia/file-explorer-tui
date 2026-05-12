@@ -166,3 +166,20 @@ std::string get_login_username() {
   uid_t uid = getuid(); // Get real User ID
   return get_username(uid);
 }
+
+void get_human_size(size_t value, char *buffer, size_t n) {
+  static const char *units[] = {"B", "K", "M", "G", "T"};
+  int unit_index = 0;
+  while (value > 1024 && unit_index + 1 < sizeof units / sizeof units[0]) {
+    value = value / 1024;
+    unit_index++;
+  }
+
+  if (value > 1024) {
+    snprintf(buffer, n, "inf");
+    return;
+  }
+
+  snprintf(buffer, n, "%zu%s", value, units[unit_index]);
+  buffer[n] = 0;
+}

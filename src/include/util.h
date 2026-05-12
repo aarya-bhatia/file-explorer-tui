@@ -41,3 +41,5 @@ std::string get_last_access_date(struct timespec &atime);
 
 std::string get_hostname();
 std::string get_login_username();
+
+void get_human_size(size_t value, char *buffer, size_t n);
