@@ -9,83 +9,8 @@
 #include <unistd.h>
 #include <vector>
 
-void get_file_stat(const char *filepath, FileStat &filestat) {
-  if (stat(filepath, &filestat.s) < 0) {
-    perror("stat");
-    return;
-  }
-
-  filestat.owner_name = get_username(filestat.s.st_uid);
-  filestat.group_name = get_groupname(filestat.s.st_gid);
-
-  mode_t &mode = filestat.s.st_mode;
-  if (S_ISDIR(mode)) {
-    filestat.mode_s[0] = 'd';
-  } else if (S_ISREG(mode)) {
-    filestat.mode_s[0] = '-';
-  } else {
-    filestat.mode_s[0] = '?';
-  }
-
-  if (mode & S_IRUSR) {
-    filestat.mode_s[1] = 'r';
-  } else {
-    filestat.mode_s[1] = '-';
-  }
-
-  if (mode & S_IWUSR) {
-    filestat.mode_s[2] = 'w';
-  } else {
-    filestat.mode_s[2] = '-';
-  }
-
-  if (mode & S_IXUSR) {
-    filestat.mode_s[3] = 'x';
-  } else {
-    filestat.mode_s[3] = '-';
-  }
-
-  if (mode & S_IRGRP) {
-    filestat.mode_s[4] = 'r';
-  } else {
-    filestat.mode_s[4] = '-';
-  }
-
-  if (mode & S_IWGRP) {
-    filestat.mode_s[5] = 'w';
-  } else {
-    filestat.mode_s[5] = '-';
-  }
-
-  if (mode & S_IXGRP) {
-    filestat.mode_s[6] = 'x';
-  } else {
-    filestat.mode_s[6] = '-';
-  }
-
-  if (mode & S_IROTH) {
-    filestat.mode_s[7] = 'r';
-  } else {
-    filestat.mode_s[7] = '-';
-  }
-
-  if (mode & S_IWOTH) {
-    filestat.mode_s[8] = 'w';
-  } else {
-    filestat.mode_s[8] = '-';
-  }
-
-  if (mode & S_IXOTH) {
-    filestat.mode_s[9] = 'x';
-  } else {
-    filestat.mode_s[9] = '-';
-  }
-
-  filestat.mod_date = get_last_access_date(filestat.s.st_mtimespec);
-}
-
-std::string get_last_access_date(struct timespec &atime) {
-  time_t timestamp = atime.tv_sec;
+std::string get_human_time(struct timespec &ts) {
+  time_t timestamp = ts.tv_sec;
   struct tm time_info;
   if (localtime_r(&timestamp, &time_info) == NULL) {
     perror("localtime_r");
@@ -182,4 +107,18 @@ void get_human_size(size_t value, char *buffer, size_t n) {
 
   snprintf(buffer, n, "%zu%s", value, units[unit_index]);
   buffer[n] = 0;
+}
+
+const char *rstrstr(const char *str, const char *substr) {
+  const char *s = strstr(str, substr);
+  if (!s) {
+    return NULL;
+  }
+
+  const char *t = NULL;
+  while ((t = strstr(s + 1, substr))) {
+    s = t;
+  }
+
+  return s;
 }

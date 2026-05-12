@@ -6,9 +6,13 @@
 #include <string>
 #include <time.h>
 #include <vector>
+#include <functional>
 
 struct AppState
 {
+  using SortStrategy = std::function<bool(const std::unique_ptr<File> &f1, const std::unique_ptr<File> &f2)>;
+  using FilterStrategy = std::function<bool(const File &f)>;
+
   AppState(const char *cwd = NULL);
   ~AppState();
   bool running = true;
@@ -24,6 +28,9 @@ struct AppState
   std::string cwd;
   std::string statusline;
   std::vector<std::unique_ptr<File>> files;
+  SortStrategy sort_strategy;
+  FilterStrategy filter_strategy;
+
   enum class Mode
   {
     Normal,
@@ -89,14 +96,7 @@ struct AppState
 
   void find_and_select(const std::string &filepath)
   {
-    for (int i = 0; i < files.size(); i++)
-    {
-      if (is_same_file(files[i]->filename.c_str(), filepath.c_str()))
-      {
-        selected_entry = i;
-        break;
-      }
-    }
+    // TODO
   }
 
   int top_entry_index() { return user_scroll; }
@@ -203,4 +203,6 @@ struct AppState
       log_info("Failed to open directory: %s", get_selected_filename().c_str());
     }
   }
+
+  void sort_files();
 };

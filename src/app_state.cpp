@@ -1,4 +1,5 @@
 #include "include/app_state.h"
+#include "include/cwalk.h"
 #include <cstring>
 #include <dirent.h>
 #include <libgen.h>
@@ -7,7 +8,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include "include/cwalk.h"
 
 AppState::~AppState() {}
 
@@ -115,4 +115,8 @@ bool AppState::open_directory(std::string &path) {
   reload_file_list();
   selected_entry = 0;
   return true;
+}
+
+void AppState::sort_files() {
+  std::sort(files.begin(), files.end(), sort_strategy);
 }

@@ -15,6 +15,7 @@ public:
   virtual ~View();
   virtual void render(const AppState &state) = 0;
   virtual void resize(Rect r);
+  void set_dirty(){dirty=true;}
 
   int width() const { return getmaxx(win); }
   int height() const { return getmaxy(win); }

@@ -1,5 +1,6 @@
 #include "../include/util.h"
 #include "cmdlineview.h"
+#include "../include/fileutil.h"
 
 void CmdLineView::render(const AppState &state) {
   werase(win);

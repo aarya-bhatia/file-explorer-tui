@@ -1,4 +1,5 @@
 #include "include/app.h"
+#include "include/fileutil.h"
 #include "views/cmdlineview.h"
 #include "views/filelistview.h"
 #include "views/titleview.h"
@@ -309,5 +310,18 @@ void Application::handle_user_command(const std::vector<std::string> &tokens)
   {
     state.statusline = state.cwd;
     state.statushidden = false;
+  }
+  else if(tokens[0] == "sort") {
+    if(tokens.size() == 1) {
+      state.sort_strategy = sort_by_name_and_directory;
+      state.sort_files();
+    } else if(tokens[1] == "filetype") {
+      state.sort_strategy = sort_by_filetype;
+      state.sort_files();
+    }
+  }
+  
+  for(auto &view: views) {
+    view->set_dirty();
   }
 }
