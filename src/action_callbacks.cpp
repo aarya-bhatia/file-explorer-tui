@@ -1,5 +1,4 @@
 #include "action_callbacks.h"
-#include "util.h"
 #include <fcntl.h>
 #include <ncurses.h>
 #include <sys/stat.h>
@@ -7,7 +6,7 @@
 
 bool CreateFileCallback::run(AppState &state) {
   log_info("Started CreateFileCallback with input:%s",
-             state.cmdline_input.c_str());
+           state.cmdline_input.c_str());
   std::string filepath = state.cmdline_input;
   if (filepath.empty()) {
     state.statusline = "";
@@ -33,7 +32,7 @@ bool CreateFileCallback::run(AppState &state) {
       state.statusline = "Failed to create directory " + filepath;
       state.find_and_select(filepath);
     } else {
-      state.reload_file_list();
+      state.reload();
       state.statusline = "successfully created directory " + filepath;
     }
   } else {
@@ -44,11 +43,10 @@ bool CreateFileCallback::run(AppState &state) {
       state.statusline = "Failed to create file " + filepath;
     } else {
       close(fd);
-      state.reload_file_list();
+      state.reload();
       state.find_and_select(filepath);
       state.statusline = "successfully created file " + filepath;
     }
   }
   return true;
 }
-

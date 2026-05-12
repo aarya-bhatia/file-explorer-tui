@@ -12,7 +12,7 @@ private:
   std::string path;
 
 public:
-  Directory(std::string &_path) : path(_path) {
+  Directory(const std::string &_path) : path(_path) {
     dirp = opendir(path.c_str());
     if (!dirp) {
       log_error("opendir(): %s", std::strerror(errno));

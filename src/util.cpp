@@ -9,6 +9,19 @@
 #include <unistd.h>
 #include <vector>
 
+bool get_system_cwd(std::string &result) {
+  char *buf = NULL;
+  buf = getcwd(buf, 0);
+  if (buf == NULL) {
+    perror("getcwd");
+    return false;
+  }
+
+  result = std::string(buf);
+  free(buf);
+  return true;
+}
+
 std::string get_human_time(struct timespec &ts) {
   time_t timestamp = ts.tv_sec;
   struct tm time_info;

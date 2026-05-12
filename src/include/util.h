@@ -1,6 +1,4 @@
 #pragma once
-#include "cwalk.h"
-#include "log.h"
 #include <pwd.h>
 #include <string>
 #include <sys/stat.h>
@@ -23,3 +21,4 @@ std::string get_login_username();
 void get_human_size(size_t value, char *buffer, size_t n);
 const char *rstrstr(const char *str, const char *substr);
 
+bool get_system_cwd(std::string &result);

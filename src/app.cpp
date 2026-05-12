@@ -138,6 +138,7 @@ Application::Input Application::convert_input(int ch) {
 
 void Application::run() {
   while (state.running) {
+    log_debug("Drawing application...");
     render();
     int ch = getch();
     if (ch == KEY_RESIZE) {
@@ -205,6 +206,7 @@ void Application::handle_input(Input &input) {
 
   switch (input.type) {
   case Input::Type::ENTER:
+    log_debug("Opening selected entry");
     state.open_selected_entry();
     break;
 
