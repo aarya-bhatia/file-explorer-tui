@@ -106,7 +106,7 @@ struct AppState
     return std::min<int>(user_scroll + file_view_height - 1, files.size() - 1);
   }
 
-  bool window_is_file_visible(int index)
+  bool is_entry_visible(int index)
   {
     return index >= top_entry_index() && index <= bottom_entry_index();
   }

@@ -1,5 +1,6 @@
 #include "include/app_state.h"
 #include "include/cwalk.h"
+#include "include/directory.h"
 #include <cstring>
 #include <dirent.h>
 #include <libgen.h>
@@ -33,25 +34,14 @@ AppState::AppState(const char *_cwd) {
 bool AppState::reload_file_list() {
   files.clear();
 
-  struct dirent *entry = NULL;
-  DIR *dirp = opendir(cwd.c_str());
-  if (!dirp) {
-    perror("opendir");
+  Directory d(cwd);
+  if (!d.ok()) {
     return false;
   }
 
   log_info("listing files in cwd:%s", cwd.c_str());
+  d.list(files);
 
-  while ((entry = readdir(dirp)) != NULL) {
-    if (show_dotfiles == false) {
-      if (entry->d_namlen > 0 && entry->d_name[0] != '.') {
-        files.emplace_back(
-            std::make_unique<File>(cwd, std::string(entry->d_name)));
-      }
-    }
-  }
-
-  closedir(dirp);
   log_info("Total files: %ld", files.size());
   return true;
 }
@@ -91,9 +81,6 @@ bool AppState::open_parent_directory() {
   size_t n = 0;
   cwk_path_get_dirname(cwd.c_str(), &n);
   cwd = cwd.substr(0, n);
-  // std::vector<char> buf(cwd.size() + 1);
-  // cwk_path_normalize(cwd.c_str(), buf.data(), buf.size());
-  // cwd = buf.data();
   log_debug("changed cwd: %s", cwd.c_str());
   return open_directory(cwd);
 }
@@ -110,7 +97,8 @@ bool AppState::open_directory(std::string &path) {
     log_info("Not a directory: %s", path.c_str());
     return false;
   }
-  cwd = path;
+  if (cwd != path)
+    cwd = path;
   log_info("changed cwd: %s", cwd.c_str());
   reload_file_list();
   selected_entry = 0;
