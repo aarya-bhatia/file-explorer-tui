@@ -2,12 +2,8 @@
 #include "include/cwalk.h"
 #include "util.h"
 
-void get_file_stat(const char *filepath, FileStat &filestat) {
-  if (stat(filepath, &filestat.s) < 0) {
-    perror("stat");
-    return;
-  }
-
+void get_file_stat(const std::unique_ptr<File> &file, FileStat &filestat) {
+  filestat.s = file->st;
   filestat.owner_name = get_username(filestat.s.st_uid);
   filestat.group_name = get_groupname(filestat.s.st_gid);
 

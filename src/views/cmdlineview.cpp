@@ -1,6 +1,6 @@
+#include "../include/fileutil.h"
 #include "../include/util.h"
 #include "cmdlineview.h"
-#include "../include/fileutil.h"
 
 void CmdLineView::render(const AppState &state) {
   werase(win);
@@ -29,9 +29,9 @@ void CmdLineView::render(const AppState &state) {
 }
 
 void CmdLineView::print_file_stat(const AppState &state) {
-  const std::string &selected_filename = state.get_selected_filename();
+  auto &selected_file = state.get_selected_file();
   FileStat s{};
-  get_file_stat((state.cwd + "/" + selected_filename).c_str(), s);
+  get_file_stat(selected_file, s);
   wattron(win, COLOR_PAIR(Colors::Blue));
   wprintw(win, "%s", s.mode_s);
   wattroff(win, COLOR_PAIR(Colors::Blue));
@@ -43,10 +43,10 @@ void CmdLineView::print_file_stat(const AppState &state) {
 }
 
 void CmdLineView::print_file_index(const AppState &state) {
-  if (state.files.size() > 0) {
+  if (state.count_files() > 0) {
     char s[24] = {0};
-    snprintf(s, sizeof s - 1, "[%d/%lu]", 1 + state.selected_entry,
-             state.files.size());
+    snprintf(s, sizeof s - 1, "[%d/%lu]", 1 + state.selected_entry(),
+             state.count_files());
     print_right_align(0, s);
   }
 }

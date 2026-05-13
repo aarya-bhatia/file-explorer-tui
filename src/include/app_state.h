@@ -1,18 +1,38 @@
 #pragma once
-#include "file.h"
+#include "directory.h"
+#include "fileutil.h"
 #include "util.h"
 #include <assert.h>
-#include <functional>
+#include <stack>
 #include <string>
 #include <time.h>
-#include <vector>
 
 struct AppState {
-  using SortStrategy = std::function<bool(const std::unique_ptr<File> &f1,
-                                          const std::unique_ptr<File> &f2)>;
-  using FilterStrategy = std::function<bool(const File &f)>;
-
   AppState(const char *cwd = NULL);
+
+  std::stack<std::unique_ptr<Directory>> open_dirs;
+  std::unique_ptr<Directory> &cur_dir() {
+    assert(!open_dirs.empty());
+    return open_dirs.top();
+  }
+  const std::unique_ptr<Directory> &cur_dir() const {
+    assert(!open_dirs.empty());
+    return open_dirs.top();
+  }
+  const std::unique_ptr<File> &get_selected_file() const {
+    return cur_dir()->get_selected_entry();
+  }
+  const std::string &get_selected_filename() const {
+    return get_selected_file()->filename;
+  }
+  std::string get_selected_filepath() const {
+    return cur_dir()->get_selected_filepath();
+  }
+  const std::string &get_cwd() const { return cur_dir()->get_path(); }
+  size_t count_files() const { return cur_dir()->count_files(); }
+  const std::unique_ptr<File> &get_file(int index) const {
+    return cur_dir()->get_file(index);
+  }
 
   bool running = true;
   bool show_dotfiles = false;
@@ -20,15 +40,14 @@ struct AppState {
   bool show_preview = false;
   bool statushidden = true;
   bool typing = false;
-  int selected_entry = 0;
-  int user_scroll = 0;
   int view_height, view_width, file_view_height = 0;
   std::string cmdline_input;
-  std::string cwd;
   std::string statusline;
-  std::vector<std::unique_ptr<File>> files;
   SortStrategy sort_strategy;
   FilterStrategy filter_strategy;
+
+  int selected_entry() const { return cur_dir()->selected_index(); }
+  int user_scroll() const { return cur_dir()->scroll_index(); }
 
   enum class Mode { Normal, Command, Search } mode = Mode::Normal;
 
@@ -39,47 +58,19 @@ struct AppState {
         .begy = 0, .begx = 0, .nlines = view_height, .ncols = view_width};
   }
 
-  bool select_prev();
-  bool select_next();
-  void select_bottom_entry();
-  void select_top_entry();
-  void select_middle_entry();
-  void open_selected_entry();
-  bool open_parent_directory();
   bool open_directory(const std::string &path);
-  void scroll_up();
-  void scroll_down();
-  void handle_up_key();
-  void handle_down_key();
   void quit() { running = false; }
-  void reload() { open_directory(cwd); }
+  void reload() { cur_dir()->reload(); }
   void toggle_show_status() { statushidden = !statushidden; }
   void toggle_show_help() { show_help_menu = !show_help_menu; }
-
-  const std::unique_ptr<File> &get_selected_entry() const {
-    return files[selected_entry];
-  }
-
-  const std::string &get_selected_filename() const {
-    return files[selected_entry]->filename;
-  }
-
-  std::string get_selected_filepath() const;
-
-  int top_entry_index() { return user_scroll; }
-
-  int bottom_entry_index() {
-    return std::min<int>(user_scroll + file_view_height - 1, files.size() - 1);
-  }
-
-  bool is_entry_visible(int index) {
-    return index >= top_entry_index() && index <= bottom_entry_index();
-  }
+  void handle_up_key();
+  void handle_down_key();
 
   bool open_selected_directory() {
-    return open_directory(get_selected_filepath());
+    return open_directory(cur_dir()->get_selected_filepath());
   }
 
-  void sort_files() { std::sort(files.begin(), files.end(), sort_strategy); }
-  void find_and_select(const std::string &filepath);
+  void open_selected_entry();
+
+  bool open_parent_directory();
 };

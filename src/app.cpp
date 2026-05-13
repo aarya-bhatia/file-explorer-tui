@@ -26,7 +26,8 @@ Application::Application(const char *cwd) : state(cwd) {
 
 void Application::resize() {
   if (LINES < MIN_LINES || COLS < MIN_COLS) {
-    log_printf("ERROR screen must be at least %d lines x %d cols", MIN_LINES, MIN_COLS);
+    log_printf("ERROR screen must be at least %d lines x %d cols", MIN_LINES,
+               MIN_COLS);
     state.running = false;
     return;
   }
@@ -34,9 +35,9 @@ void Application::resize() {
   log_printf("screen size: %d lines x %d cols", LINES, COLS);
   init_views();
 
-  if (!state.is_entry_visible(state.selected_entry)) {
-    state.user_scroll =
-        std::min<int>(0, state.selected_entry - state.file_view_height / 2);
+  if (!state.cur_dir()->is_entry_visible(state.selected_entry())) {
+    state.cur_dir()->set_scroll(
+        std::max<int>(0, state.selected_entry() - state.file_view_height / 2));
   }
 }
 
@@ -247,15 +248,15 @@ void Application::handle_input_key(int ch) {
     break;
 
   case 'L':
-    state.select_bottom_entry();
+    state.cur_dir()->select_bottom_entry();
     break;
 
   case 'H':
-    state.select_top_entry();
+    state.cur_dir()->select_top_entry();
     break;
 
   case 'M':
-    state.select_middle_entry();
+    state.cur_dir()->select_middle_entry();
     break;
 
   case ':':
@@ -275,15 +276,13 @@ void Application::handle_user_command(const std::vector<std::string> &tokens) {
     return;
 
   if (tokens[0] == "pwd") {
-    state.statusline = state.cwd;
+    state.statusline = state.get_cwd();
     state.statushidden = false;
   } else if (tokens[0] == "sort") {
     if (tokens.size() == 1) {
-      state.sort_strategy = sort_by_name_and_directory;
-      state.sort_files();
+      state.cur_dir()->sort_files(sort_by_name_and_directory);
     } else if (tokens[1] == "filetype") {
-      state.sort_strategy = sort_by_filetype;
-      state.sort_files();
+      state.cur_dir()->sort_files(sort_by_filetype);
     }
   }
 
