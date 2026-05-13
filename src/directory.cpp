@@ -9,7 +9,7 @@
 #include <vector>
 
 Directory::Directory(const std::string &_path, int *height)
-    : _dirpath(_path), _height(height), _scroll(0) {
+    : _dirpath(_path), _scroll(0), _height(height) {
   _dirp = opendir(_dirpath.c_str());
   if (!_dirp) {
     log_printf("ERROR opendir(): %s", std::strerror(errno));
@@ -52,19 +52,32 @@ bool Directory::select_next() {
 }
 
 void Directory::select_bottom_entry() {
+  if (_files.empty()) {
+    _selected = 0;
+    return;
+  }
   _selected = bottom_entry_index();
   log_printf("selected %d", _selected);
 }
 
 void Directory::select_top_entry() {
+  if (_files.empty()) {
+    _selected = 0;
+    return;
+  }
   _selected = top_entry_index();
   log_printf("selected %d", _selected);
 }
 
 void Directory::select_middle_entry() {
+  if (_files.empty()) {
+    _selected = 0;
+    return;
+  }
   int a = top_entry_index();
   int b = bottom_entry_index();
   _selected = a + ((b - a) >> 1);
+  if (_selected >= (int)_files.size()) _selected = _files.size() - 1;
   log_printf("selected %d", _selected);
 }
 
