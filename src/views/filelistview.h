@@ -1,9 +1,5 @@
 #pragma once
 #include "view.h"
-
-#include <filesystem>
-namespace fs = std::filesystem;
-
 class FileListView : public View {
 public:
   FileListView(Rect r) : View(r), _prev_sel(-1) {}

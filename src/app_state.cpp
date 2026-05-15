@@ -75,5 +75,10 @@ bool AppState::open_parent_directory() {
   fs::path parent = cur_dir().parent_directory();
   if (parent == cur_dir().dirpath)
     return false;
-  return open_directory(parent);
+  if (open_directory(parent)) {
+    assert(open_dirs.size() >= 2);
+    open_dirs.erase(open_dirs.end() - 2);
+    return true;
+  }
+  return false;
 }

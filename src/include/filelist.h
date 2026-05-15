@@ -15,8 +15,6 @@ struct FileList {
   int scroll = 0;
   int *view_height = NULL;
 
-  std::vector<int> child_procs;
-
   FileList(const fs::path &path, int *view_height)
       : dirpath(path), view_height(view_height) {}
 

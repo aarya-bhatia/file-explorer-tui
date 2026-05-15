@@ -1,7 +1,7 @@
 #include "include/app.h"
 #include "include/fileutil.h"
 #include "views/cmdlineview.h"
-#include "views/filelistview.h"
+#include "views/file_multilist_view.h"
 #include "views/titleview.h"
 #include <cctype>
 #include <iterator>
@@ -51,10 +51,14 @@ void Application::init_views() {
   int files_h = LINES - title_h - cmd_h;
   state.file_view_height = files_h;
 
-  views.push_back(std::make_unique<TitleView>(Rect{.begy = 0, .begx = 0, .nlines = title_h, .ncols = COLS}));
-  views.push_back(std::make_unique<FileListView>(Rect{.begy = title_h, .begx = 0, .nlines = files_h, .ncols = COLS}));
-  views.push_back(std::make_unique<CmdLineView>(Rect{.begy = title_h + files_h, .begx = 0, .nlines = cmd_h, .ncols = COLS}));
-  helpview = std::make_unique<HelpView>(Rect{.begy = 0, .begx = 0, .nlines = LINES, .ncols = COLS});
+  views.push_back(std::make_unique<TitleView>(
+      Rect{.begy = 0, .begx = 0, .nlines = title_h, .ncols = COLS}));
+  views.push_back(std::make_unique<FileMultiListView>(
+      Rect{.begy = title_h, .begx = 0, .nlines = files_h, .ncols = COLS}, 3));
+  views.push_back(std::make_unique<CmdLineView>(Rect{
+      .begy = title_h + files_h, .begx = 0, .nlines = cmd_h, .ncols = COLS}));
+  helpview = std::make_unique<HelpView>(
+      Rect{.begy = 0, .begx = 0, .nlines = LINES, .ncols = COLS});
 }
 
 void Application::render() {
