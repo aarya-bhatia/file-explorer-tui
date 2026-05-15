@@ -113,7 +113,7 @@ std::string get_login_username() {
 void get_human_size(size_t value, char *buffer, size_t n) {
   static const std::array units = {"B", "K", "M", "G", "T"};
   size_t i;
-  for (i = 0; value > 1024 && i < std::size(units); i++) {
+  for (i = 0; value > 1024 && i+1 < std::size(units); i++) {
     value = value / 1024;
   }
   if (value > 1024) {
@@ -121,7 +121,6 @@ void get_human_size(size_t value, char *buffer, size_t n) {
     return;
   }
   snprintf(buffer, n, "%zu%s", value, units[i]);
-  buffer[n] = 0;
 }
 
 const char *rstrstr(const char *str, const char *substr) {

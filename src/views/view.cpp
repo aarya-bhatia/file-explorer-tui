@@ -17,12 +17,11 @@ void View::resize(Rect r) {
   dirty = true;
 }
 
-void View::print_right_align(int y, char *text) {
+void View::print_right_align(int y, const char *text) {
   int width = getmaxx(win);
-  size_t text_len = strlen(text);
+  int text_len = (int)strlen(text);
   if (text_len > width) {
-    text[width] = 0;
     text_len = width;
   }
-  mvwprintw(win, y, width - text_len, text);
+  mvwaddnstr(win, y, width - text_len, text, text_len);
 }

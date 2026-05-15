@@ -45,7 +45,7 @@ void CmdLineView::print_file_stat(const AppState &state) {
 void CmdLineView::print_file_index(const AppState &state) {
   if (state.count_files() > 0) {
     char s[24] = {0};
-    snprintf(s, sizeof s - 1, "[%d/%lu]", 1 + state.selected_entry(),
+    snprintf(s, sizeof s, "[%d/%lu]", 1 + state.selected_entry(),
              state.count_files());
     print_right_align(0, s);
   }

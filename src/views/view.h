@@ -8,7 +8,7 @@ protected:
   WINDOW *win = NULL;
   bool dirty = true;
 
-  void print_right_align(int y, char *text);
+  void print_right_align(int y, const char *text);
 
 public:
   View(Rect r);
