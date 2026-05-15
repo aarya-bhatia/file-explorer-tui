@@ -1,7 +1,10 @@
 #include "util.h"
+#include <array>
 #include <cstdarg>
 #include <cstdio>
+#include <filesystem>
 #include <grp.h>
+#include <iostream>
 #include <limits.h>
 #include <pwd.h>
 #include <stdio.h>
@@ -10,6 +13,8 @@
 #include <time.h>
 #include <unistd.h>
 #include <vector>
+
+namespace fs = std::filesystem;
 
 void log_printf(const char *format, ...) {
   if (strlen(format) == 0)
@@ -23,16 +28,15 @@ void log_printf(const char *format, ...) {
 }
 
 bool get_system_cwd(std::string &result) {
-  char *buf = NULL;
-  buf = getcwd(buf, 0);
-  if (buf == NULL) {
-    perror("getcwd");
+  try {
+    fs::path cwd = fs::current_path();
+    std::cout << "Current path is: " << cwd << std::endl;
+    result = cwd.string();
+    return true;
+  } catch (const fs::filesystem_error &e) {
+    std::cerr << "Error: " << e.what() << std::endl;
     return false;
   }
-
-  result = std::string(buf);
-  free(buf);
-  return true;
 }
 
 std::string get_human_time(struct timespec &ts) {
@@ -57,51 +61,39 @@ std::string get_human_time(struct timespec &ts) {
 std::string get_username(uid_t uid) {
 
   struct passwd p, *result;
-  size_t bufsize = sysconf(_SC_GETPW_R_SIZE_MAX);
+  long bufsize = sysconf(_SC_GETPW_R_SIZE_MAX);
   if (bufsize == -1)
     bufsize = 16384;
 
-  char *buf = (char *)malloc(bufsize);
-  if (buf == NULL) {
-    perror("malloc");
-    return "user";
-  }
-
-  getpwuid_r(uid, &p, buf, bufsize, &result);
+  std::vector<char> buf(bufsize);
+  getpwuid_r(uid, &p, buf.data(), buf.size(), &result);
   if (!result) {
-    free(buf);
     return "user";
   }
 
   std::string username = p.pw_name;
-  free(buf);
   return username;
 }
 
 std::string get_groupname(gid_t gid) {
   struct group grp;
   struct group *g_result;
-  size_t bufsize = sysconf(_SC_GETGR_R_SIZE_MAX);
+  long bufsize = sysconf(_SC_GETGR_R_SIZE_MAX);
   if (bufsize == -1)
     bufsize = 16384;
-  char *gbuf = (char *)malloc(bufsize);
-  if (gbuf == NULL) {
-    perror("malloc");
-    return "group";
-  }
-  getgrgid_r(gid, &grp, gbuf, bufsize, &g_result);
+  std::vector<char> gbuf(bufsize);
+  getgrgid_r(gid, &grp, gbuf.data(), gbuf.size(), &g_result);
   std::string result;
   if (g_result != NULL) {
     result = std::string(grp.gr_name);
   } else {
     result = "group";
   }
-  free(gbuf);
   return result;
 }
 
 std::string get_hostname() {
-  size_t bufsize = sysconf(_SC_HOST_NAME_MAX);
+  long bufsize = sysconf(_SC_HOST_NAME_MAX);
   if (bufsize == -1)
     bufsize = 255;
   std::vector<char> buf(bufsize + 1);
@@ -119,19 +111,16 @@ std::string get_login_username() {
 }
 
 void get_human_size(size_t value, char *buffer, size_t n) {
-  static const char *units[] = {"B", "K", "M", "G", "T"};
-  int unit_index = 0;
-  while (value > 1024 && unit_index + 1 < sizeof units / sizeof units[0]) {
+  static const std::array units = {"B", "K", "M", "G", "T"};
+  size_t i;
+  for (i = 0; value > 1024 && i < std::size(units); i++) {
     value = value / 1024;
-    unit_index++;
   }
-
   if (value > 1024) {
     snprintf(buffer, n, "inf");
     return;
   }
-
-  snprintf(buffer, n, "%zu%s", value, units[unit_index]);
+  snprintf(buffer, n, "%zu%s", value, units[i]);
   buffer[n] = 0;
 }
 

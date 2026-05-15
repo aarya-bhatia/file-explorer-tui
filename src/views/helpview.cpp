@@ -1,12 +1,19 @@
 #include "helpview.h"
+#include <array>
 
 void HelpView::render(const AppState &state) {
   werase(win);
-  mvwprintw(win, 0, 0, "[?] toggle help menu");
-  mvwprintw(win, 1, 0, "[q] quit");
-  mvwprintw(win, 2, 0, "[j] move down");
-  mvwprintw(win, 3, 0, "[k] move up");
-  mvwprintw(win, 4, 0, "[<ENTER>] select");
-  mvwprintw(win, 5, 0, "[-] go to parent dir");
+  static const std::array menu_items = {
+    "[?] toggle help menu",
+    "[q] quit",
+    "[j] move down",
+    "[k] move up",
+    "[<ENTER>] select",
+    "[-] go to parent dir",
+  };
+
+  for(int i = 0; i < std::size(menu_items); i++) {
+    mvwprintw(win, i, 0, menu_items[i]);
+  }
   wnoutrefresh(win);
 }

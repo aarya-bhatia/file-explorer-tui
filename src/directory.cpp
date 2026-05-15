@@ -1,6 +1,6 @@
-#include "directory.h"
-#include "file.h"
-#include "util.h"
+#include "include/directory.h"
+#include "include/file.h"
+#include "include/util.h"
 #include <cassert>
 #include <dirent.h>
 #include <libgen.h>
@@ -77,7 +77,8 @@ void Directory::select_middle_entry() {
   int a = top_entry_index();
   int b = bottom_entry_index();
   _selected = a + ((b - a) >> 1);
-  if (_selected >= (int)_files.size()) _selected = _files.size() - 1;
+  if (_selected >= (int)_files.size())
+    _selected = _files.size() - 1;
   log_printf("selected %d", _selected);
 }
 

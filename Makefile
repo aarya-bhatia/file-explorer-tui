@@ -10,9 +10,10 @@ DEPS = $(SRCS:src/%=obj/%.d)
 INC_DIR=$(shell find src -type d)
 INC_FLAGS=$(addprefix -I, $(INC_DIR))
 
-LDFLAGS=-lncurses -lm
-CXXFLAGS=-c -Wall -std=c++17 -MMD -MP $(INC_FLAGS)
-CFLAGS=-c -Wall -std=c99 -MMD -MP $(INC_FLAGS)
+LDFLAGS=-lncurses -lm -fsanitize=address
+COMMON_FLAGS=-c -Wall -Wextra -fsanitize=address -MMD -MP $(INC_FLAGS) -fdiagnostics-show-template-tree
+CXXFLAGS=-std=c++17 $(COMMON_FLAGS)
+CFLAGS=-std=c99 $(COMMON_FLAGS)
 
 files: $(SRC_OBJECTS)
 	g++ $(LDFLAGS) $^ -o $@

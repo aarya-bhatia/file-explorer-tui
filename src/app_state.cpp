@@ -10,7 +10,7 @@
 #include <unistd.h>
 
 AppState::AppState(const char *start_cwd) {
-  std::string cwd;
+  std::string cwd = "";
   if (start_cwd) {
     cwd = start_cwd;
   } else if (!get_system_cwd(cwd)) {
