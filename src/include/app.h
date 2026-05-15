@@ -5,7 +5,6 @@
 #include "action_callbacks.h"
 #include <memory>
 #include <ncurses.h>
-#include <functional>
 #include <stdio.h>
 #include <vector>
 
@@ -37,8 +36,6 @@ private:
   std::unique_ptr<ActionCallback> next_callback;
 
   void init_views();
-  bool add_view(std::function<std::unique_ptr<View>(Rect)> makeview, int req_h);
-  int get_unused_height();
 
   Input convert_input(int ch);
   void handle_input(Input &in);

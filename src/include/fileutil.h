@@ -1,14 +1,12 @@
 #pragma once
-#include "file.h"
-#include <functional>
-#include <memory>
 #include <filesystem>
+#include <functional>
 
 namespace fs = std::filesystem;
 
-using SortStrategy = std::function<bool(const std::unique_ptr<File> &f1,
-                                        const std::unique_ptr<File> &f2)>;
-using FilterStrategy = std::function<bool(const File &f)>;
+using SortStrategy = std::function<bool(const fs::directory_entry &f1,
+                                        const fs::directory_entry &f2)>;
+using FilterStrategy = std::function<bool(const fs::directory_entry &f)>;
 
 struct FileStat {
   fs::file_status status;
@@ -19,9 +17,10 @@ struct FileStat {
   std::string mode_s = "----------";
 };
 
-void get_file_stat(const std::unique_ptr<File> &file, FileStat &filestat);
+void get_file_stat(const fs::directory_entry &file, FileStat &filestat);
 
-bool sort_by_name_and_directory(const std::unique_ptr<File> &f1,
-                                const std::unique_ptr<File> &f2);
-bool sort_by_filetype(const std::unique_ptr<File> &f1,
-                      const std::unique_ptr<File> &f2);
+bool sort_by_name_and_directory(const fs::directory_entry &f1,
+                                const fs::directory_entry &f2);
+
+bool sort_by_filetype(const fs::directory_entry &f1,
+                      const fs::directory_entry &f2);

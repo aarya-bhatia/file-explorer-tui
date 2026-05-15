@@ -1,14 +1,14 @@
 #include "filelistview.h"
 
-void _draw_filename(WINDOW *win, const std::unique_ptr<File> &entry) {
-  if (entry->is_directory()) {
-    wprintw(win, "%s/", entry->filename().c_str());
-  } else if (entry->is_file()) {
-    wprintw(win, "%s", entry->filename().c_str());
-  } else if (entry->is_link()) {
-    wprintw(win, "%s@", entry->filename().c_str());
+void _draw_filename(WINDOW *win, const fs::directory_entry &entry) {
+  if (entry.is_directory()) {
+    wprintw(win, "%s/", entry.path().filename().string().c_str());
+  } else if (entry.is_regular_file()) {
+    wprintw(win, "%s", entry.path().filename().string().c_str());
+  } else if (entry.is_symlink()) {
+    wprintw(win, "%s@", entry.path().filename().string().c_str());
   } else {
-    wprintw(win, "? %s", entry->filename().c_str());
+    wprintw(win, "? %s", entry.path().filename().string().c_str());
   }
 }
 
@@ -32,7 +32,7 @@ void FileListView::render(const AppState &state) {
   } else {
     int file_view_height = getmaxy(win);
     for (int i = state.user_scroll();
-         i < std::min(file_view_height + state.user_scroll(),
+         i < std::min((int)(file_view_height + state.user_scroll()),
                       (int)state.count_files());
          i++) {
       int y = i - state.user_scroll();

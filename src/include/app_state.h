@@ -1,38 +1,44 @@
 #pragma once
-#include "directory.h"
+#include "filelist.h"
 #include "fileutil.h"
 #include "util.h"
 #include <assert.h>
-#include <stack>
 #include <string>
 #include <time.h>
 
 struct AppState {
   AppState(const char *cwd = NULL);
 
-  std::stack<std::unique_ptr<Directory>> open_dirs;
-  std::unique_ptr<Directory> &cur_dir() {
+  std::vector<FileList> open_dirs;
+
+  FileList &cur_dir() {
     assert(!open_dirs.empty());
-    return open_dirs.top();
+    return open_dirs.back();
   }
-  const std::unique_ptr<Directory> &cur_dir() const {
+
+  const FileList &cur_dir() const {
     assert(!open_dirs.empty());
-    return open_dirs.top();
+    return open_dirs.back();
   }
-  const std::unique_ptr<File> &get_selected_file() const {
-    return cur_dir()->get_selected_entry();
+
+  const fs::directory_entry &get_selected_file() const {
+    return cur_dir().selected_file();
   }
+  
   std::string get_selected_filename() const {
-    return get_selected_file()->filename();
+    return cur_dir().selected_file().path().filename().string();
   }
-  const fs::path& get_selected_filepath() const {
-    return cur_dir()->get_selected_filepath();
+
+  fs::path get_selected_filepath() const {
+    return cur_dir().selected_file().path();
   }
-  const fs::path& get_cwd() const { return cur_dir()->get_path(); }
-  size_t count_files() const { return cur_dir()->count_files(); }
-  const std::unique_ptr<File> &get_file(int index) const {
-    return cur_dir()->get_file(index);
-  }
+
+  const fs::path& get_cwd() const { return cur_dir().dirpath; }
+  size_t count_files() const { return cur_dir().size(); }
+  const fs::directory_entry& get_file(int index) const { return cur_dir().at(index); }
+
+  int selected_entry() const { return cur_dir().selected; }
+  int user_scroll() const { return cur_dir().scroll; }
 
   bool running = true;
   bool show_dotfiles = false;
@@ -46,9 +52,6 @@ struct AppState {
   SortStrategy sort_strategy;
   FilterStrategy filter_strategy;
 
-  int selected_entry() const { return cur_dir()->selected_index(); }
-  int user_scroll() const { return cur_dir()->scroll_index(); }
-
   enum class Mode { Normal, Command, Search } mode = Mode::Normal;
 
   bool is_typing() const { return typing; }
@@ -60,14 +63,13 @@ struct AppState {
 
   bool open_directory(const fs::path &path);
   void quit() { running = false; }
-  void reload() { cur_dir()->reload(); }
   void toggle_show_status() { statushidden = !statushidden; }
   void toggle_show_help() { show_help_menu = !show_help_menu; }
   void handle_up_key();
   void handle_down_key();
 
   bool open_selected_directory() {
-    return open_directory(get_selected_filepath());
+    return open_directory(cur_dir().selected_file());
   }
 
   void open_selected_entry();

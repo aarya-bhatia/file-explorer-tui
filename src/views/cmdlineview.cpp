@@ -29,7 +29,8 @@ void CmdLineView::render(const AppState &state) {
 }
 
 void CmdLineView::print_file_stat(const AppState &state) {
-  if (state.count_files() == 0) return;
+  if (state.count_files() == 0)
+    return;
   auto &selected_file = state.get_selected_file();
   FileStat s{};
   get_file_stat(selected_file, s);

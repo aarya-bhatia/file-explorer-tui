@@ -35,56 +35,26 @@ void Application::resize() {
   log_printf("screen size: %d lines x %d cols", LINES, COLS);
   init_views();
 
-  if (!state.cur_dir()->is_entry_visible(state.selected_entry())) {
-    state.cur_dir()->set_scroll(
-        std::max<int>(0, state.selected_entry() - state.file_view_height / 2));
+  if (!state.cur_dir().is_entry_visible(state.selected_entry())) {
+    state.cur_dir().scroll =
+        std::max<int>(0, state.selected_entry() - state.file_view_height / 2);
   }
-}
-
-bool Application::add_view(
-    std::function<std::unique_ptr<View>(Rect r)> makeview, int req_h) {
-  if (req_h < 1)
-    return false;
-
-  int y = 0;
-  for (auto &view : views) {
-    y += view->height();
-  }
-  if (y + req_h > LINES) {
-    return false;
-  }
-  views.push_back(
-      makeview(Rect{.begy = y, .begx = 0, .nlines = req_h, .ncols = COLS}));
-  return true;
-}
-
-int Application::get_unused_height() {
-  int h = 0;
-  for (auto &view : views) {
-    h += view->height();
-  }
-  return LINES - h;
 }
 
 void Application::init_views() {
   erase();
   refresh();
-
   views.clear();
 
-  add_view([](Rect r) { return std::make_unique<TitleView>(r); }, 1);
+  int title_h = 1;
+  int cmd_h = 1;
+  int files_h = LINES - title_h - cmd_h;
+  state.file_view_height = files_h;
 
-  state.file_view_height = get_unused_height() - 1;
-  log_printf("file view height: %d", state.file_view_height);
-  add_view([](Rect r) { return std::make_unique<FileListView>(r); },
-           state.file_view_height);
-
-  add_view([](Rect r) { return std::make_unique<CmdLineView>(r); }, 1);
-
-  assert(views.size() == 3);
-
-  helpview = std::make_unique<HelpView>(
-      Rect{.begy = 0, .begx = 0, .nlines = LINES, .ncols = COLS});
+  views.push_back(std::make_unique<TitleView>(Rect{.begy = 0, .begx = 0, .nlines = title_h, .ncols = COLS}));
+  views.push_back(std::make_unique<FileListView>(Rect{.begy = title_h, .begx = 0, .nlines = files_h, .ncols = COLS}));
+  views.push_back(std::make_unique<CmdLineView>(Rect{.begy = title_h + files_h, .begx = 0, .nlines = cmd_h, .ncols = COLS}));
+  helpview = std::make_unique<HelpView>(Rect{.begy = 0, .begx = 0, .nlines = LINES, .ncols = COLS});
 }
 
 void Application::render() {
@@ -248,15 +218,15 @@ void Application::handle_input_key(int ch) {
     break;
 
   case 'L':
-    state.cur_dir()->select_bottom_entry();
+    state.cur_dir().select_bottom();
     break;
 
   case 'H':
-    state.cur_dir()->select_top_entry();
+    state.cur_dir().select_top();
     break;
 
   case 'M':
-    state.cur_dir()->select_middle_entry();
+    state.cur_dir().select_middle();
     break;
 
   case ':':
@@ -276,13 +246,13 @@ void Application::handle_user_command(const std::vector<std::string> &tokens) {
     return;
 
   if (tokens[0] == "pwd") {
-    state.statusline = state.get_cwd();
+    state.statusline = state.get_cwd().string();
     state.statushidden = false;
   } else if (tokens[0] == "sort") {
     if (tokens.size() == 1) {
-      state.cur_dir()->sort_files(sort_by_name_and_directory);
+      state.cur_dir().sort_files(sort_by_name_and_directory);
     } else if (tokens[1] == "filetype") {
-      state.cur_dir()->sort_files(sort_by_filetype);
+      state.cur_dir().sort_files(sort_by_filetype);
     }
   }
 
