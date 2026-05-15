@@ -27,18 +27,6 @@ void log_printf(const char *format, ...) {
     fputc('\n', stderr);
 }
 
-bool get_system_cwd(std::string &result) {
-  try {
-    fs::path cwd = fs::current_path();
-    std::cout << "Current path is: " << cwd << std::endl;
-    result = cwd.string();
-    return true;
-  } catch (const fs::filesystem_error &e) {
-    std::cerr << "Error: " << e.what() << std::endl;
-    return false;
-  }
-}
-
 std::string get_human_time(struct timespec &ts) {
   time_t timestamp = ts.tv_sec;
   struct tm time_info;

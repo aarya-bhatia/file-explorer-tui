@@ -2,34 +2,34 @@
 #include "include/file.h"
 #include "include/util.h"
 #include <cassert>
-#include <dirent.h>
-#include <libgen.h>
+#include <filesystem>
 #include <memory>
 #include <string>
 #include <vector>
 
-Directory::Directory(const std::string &_path, int *height)
-    : _dirpath(_path), _scroll(0), _height(height) {
-  _dirp = opendir(_dirpath.c_str());
-  if (!_dirp) {
-    log_printf("ERROR opendir(): %s", std::strerror(errno));
-  } else {
+namespace fs = std::filesystem;
+
+Directory::Directory(const fs::path &path, int *height)
+    : _dirpath(path), _scroll(0), _height(height) {
+  if (ok()) {
     _list();
   }
 }
 
 void Directory::_list() {
   _files.clear();
-  assert(ok());
-  rewinddir(_dirp);
-  struct dirent *e = NULL;
-  while ((e = readdir(_dirp)) != NULL) {
-    if (e->d_name[0] != '.')
-      _files.emplace_back(
-          std::make_unique<File>(_dirpath, std::string(e->d_name)));
+  try {
+    for (const auto &entry : fs::directory_iterator(_dirpath)) {
+      if (entry.path().filename().string()[0] != '.') {
+        _files.emplace_back(std::make_unique<File>(entry.path()));
+      }
+    }
+  } catch (const fs::filesystem_error &e) {
+    log_printf("ERROR listing directory: %s", e.what());
   }
-  if (_selected >= _files.size()) {
-    _selected = _files.empty() ? 0 : _files.size() - 1;
+
+  if (_selected >= (int)_files.size()) {
+    _selected = _files.empty() ? 0 : (int)_files.size() - 1;
   }
 }
 
@@ -78,25 +78,20 @@ void Directory::select_middle_entry() {
   int b = bottom_entry_index();
   _selected = a + ((b - a) >> 1);
   if (_selected >= (int)_files.size())
-    _selected = _files.size() - 1;
+    _selected = (int)_files.size() - 1;
   log_printf("selected %d", _selected);
 }
 
-std::string Directory::get_selected_filepath() const {
-  if (_files.empty() || _selected >= _files.size()) {
-    return "";
+const fs::path& Directory::get_selected_filepath() const {
+  static const fs::path empty = "";
+  if (_files.empty() || _selected >= (int)_files.size()) {
+    return empty;
   }
-  std::string filepath = _dirpath + "/" + _files[_selected]->filename;
-  char *s = realpath(filepath.c_str(), NULL);
-  if (s) {
-    filepath = std::string(s);
-    free(s);
-  }
-  return filepath;
+  return _files[_selected]->path();
 }
 
 void Directory::scroll_down() {
-  if (_scroll + 1 < _files.size()) {
+  if (_scroll + 1 < (int)_files.size()) {
     _scroll++;
     log_printf("scrolled down to %d", _scroll);
   }
@@ -109,9 +104,6 @@ void Directory::scroll_up() {
   }
 }
 
-std::string Directory::get_parent_path() const {
-  std::vector<char> path_copy{_dirpath.begin(), _dirpath.end()};
-  path_copy.push_back(0);
-  char *dname = dirname(path_copy.data());
-  return std::string(dname);
+fs::path Directory::get_parent_path() const {
+  return _dirpath.parent_path();
 }

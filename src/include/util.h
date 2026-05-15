@@ -4,6 +4,10 @@
 #include <sys/stat.h>
 
 
+#include <filesystem>
+
+namespace fs = std::filesystem;
+
 struct Rect {
   int begy, begx, nlines, ncols;
 };
@@ -21,7 +25,5 @@ std::string get_login_username();
 
 void get_human_size(size_t value, char *buffer, size_t n);
 const char *rstrstr(const char *str, const char *substr);
-
-bool get_system_cwd(std::string &result);
 
 void log_printf(const char *format, ...);

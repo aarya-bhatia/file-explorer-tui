@@ -22,13 +22,13 @@ struct AppState {
   const std::unique_ptr<File> &get_selected_file() const {
     return cur_dir()->get_selected_entry();
   }
-  const std::string &get_selected_filename() const {
-    return get_selected_file()->filename;
+  std::string get_selected_filename() const {
+    return get_selected_file()->filename();
   }
-  std::string get_selected_filepath() const {
+  const fs::path& get_selected_filepath() const {
     return cur_dir()->get_selected_filepath();
   }
-  const std::string &get_cwd() const { return cur_dir()->get_path(); }
+  const fs::path& get_cwd() const { return cur_dir()->get_path(); }
   size_t count_files() const { return cur_dir()->count_files(); }
   const std::unique_ptr<File> &get_file(int index) const {
     return cur_dir()->get_file(index);
@@ -58,7 +58,7 @@ struct AppState {
         .begy = 0, .begx = 0, .nlines = view_height, .ncols = view_width};
   }
 
-  bool open_directory(const std::string &path);
+  bool open_directory(const fs::path &path);
   void quit() { running = false; }
   void reload() { cur_dir()->reload(); }
   void toggle_show_status() { statushidden = !statushidden; }
@@ -67,7 +67,7 @@ struct AppState {
   void handle_down_key();
 
   bool open_selected_directory() {
-    return open_directory(cur_dir()->get_selected_filepath());
+    return open_directory(get_selected_filepath());
   }
 
   void open_selected_entry();

@@ -1,15 +1,14 @@
 #include "filelistview.h"
 
 void _draw_filename(WINDOW *win, const std::unique_ptr<File> &entry) {
-  auto &filemode = entry->st.st_mode;
-  if (S_ISDIR(filemode)) {
-    wprintw(win, "%s/", entry->filename.c_str());
-  } else if (S_ISREG(filemode)) {
-    wprintw(win, "%s", entry->filename.c_str());
-  } else if (S_ISLNK(filemode)) {
-    wprintw(win, "%s@", entry->filename.c_str());
+  if (entry->is_directory()) {
+    wprintw(win, "%s/", entry->filename().c_str());
+  } else if (entry->is_file()) {
+    wprintw(win, "%s", entry->filename().c_str());
+  } else if (entry->is_link()) {
+    wprintw(win, "%s@", entry->filename().c_str());
   } else {
-    wprintw(win, "? %s", entry->filename.c_str());
+    wprintw(win, "? %s", entry->filename().c_str());
   }
 }
 

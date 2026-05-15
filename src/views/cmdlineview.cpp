@@ -29,16 +29,17 @@ void CmdLineView::render(const AppState &state) {
 }
 
 void CmdLineView::print_file_stat(const AppState &state) {
+  if (state.count_files() == 0) return;
   auto &selected_file = state.get_selected_file();
   FileStat s{};
   get_file_stat(selected_file, s);
   wattron(win, COLOR_PAIR(Colors::Blue));
-  wprintw(win, "%s", s.mode_s);
+  wprintw(win, "%s", s.mode_s.c_str());
   wattroff(win, COLOR_PAIR(Colors::Blue));
   wprintw(win, " %s %s %s", s.owner_name.c_str(), s.group_name.c_str(),
           s.mod_date.c_str());
   std::vector<char> dispsize(32);
-  get_human_size(s.s.st_size, dispsize.data(), dispsize.size());
+  get_human_size(s.size, dispsize.data(), dispsize.size());
   wprintw(win, " %s", dispsize.data());
 }
 

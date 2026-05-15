@@ -1,22 +1,22 @@
 #include "include/app_state.h"
 #include "include/directory.h"
 #include <cstring>
-#include <dirent.h>
-#include <libgen.h>
 #include <memory>
 #include <stdio.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <unistd.h>
 
 AppState::AppState(const char *start_cwd) {
-  std::string cwd = "";
+  fs::path cwd;
   if (start_cwd) {
     cwd = start_cwd;
-  } else if (!get_system_cwd(cwd)) {
-    log_printf("invalid cwd");
-    running = false;
-    return;
+  } else {
+    try {
+      cwd = fs::current_path();
+    } catch (const fs::filesystem_error &e) {
+      log_printf("invalid cwd: %s", e.what());
+      running = false;
+      return;
+    }
   }
 
   if (!open_directory(cwd)) {
@@ -27,7 +27,7 @@ AppState::AppState(const char *start_cwd) {
   log_printf("Initialized AppState with cwd: %s", cwd.c_str());
 }
 
-bool AppState::open_directory(const std::string &path) {
+bool AppState::open_directory(const fs::path &path) {
   auto d = std::make_unique<Directory>(path, &file_view_height);
   if (!d->ok()) {
     return false;
@@ -41,7 +41,7 @@ void AppState::open_selected_entry() {
   if (count_files() == 0) return;
   auto &dir = cur_dir();
   auto &selfile = dir->get_selected_entry();
-  if (S_ISDIR(selfile->st.st_mode)) {
+  if (selfile->is_directory()) {
     open_selected_directory();
   } else {
     std::string path = dir->get_selected_filepath();
@@ -74,7 +74,7 @@ void AppState::handle_down_key() {
 }
 
 bool AppState::open_parent_directory() {
-  std::string parent = cur_dir()->get_parent_path();
+  fs::path parent = cur_dir()->get_parent_path();
   if (parent == get_cwd()) return false;
   return open_directory(parent);
 }
