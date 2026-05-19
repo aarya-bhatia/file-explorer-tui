@@ -7,146 +7,172 @@
 #include <ncurses.h>
 
 struct SplitController {
-  std::map<fs::path, fs::path> last_selected;
-  std::vector<FileList *> splits;
-  int cur_split = 0;
+  std::map<fs::path, fs::path> _last_selected;
+  std::vector<FileList *> _splits;
+  int _cur = 0;
   Rect bounds;
-
-  std::vector<WINDOW *> view_cols;
+  std::vector<WINDOW *> _views;
 
   std::string root_path() const {
-    return splits[0] ? splits[0]->dirpath.string() : "";
+    return _splits[0] ? _splits[0]->dirpath.string() : "";
   }
+
+  void set_root_path(fs::path path) { set_split_path(0, path); }
 
   void sort(SortStrategy strategy) {
-    if (splits[cur_split] == NULL)
+    if (_splits[_cur] == NULL)
       return;
-    splits[cur_split]->sort_files(strategy);
-    splits[cur_split]->adjust_scroll();
+    _splits[_cur]->sort_files(strategy);
+    _splits[_cur]->adjust_scroll();
   }
 
-  SplitController(int num_split=0) : splits(num_split) {}
+  SplitController(int num_split = 0) : _splits(num_split) {
+    for (int i = 0; i < num_split; i++) {
+      _splits[i] = NULL;
+    }
+  }
 
   ~SplitController() {
-    for (FileList *split : splits)
+    for (FileList *split : _splits)
       delete split;
-  }
-
-  void clean_orphan_splits() {
-    for (int i = 0; i < splits.size(); i++) {
-      if (splits[i] != NULL && i > 0 && splits[i - 1] == NULL) {
-        delete splits[i];
-        splits[i] = NULL;
-      }
-    }
+    _splits.clear();
   }
 
   void resize(Rect r) {
     bounds = r;
-    for (int i = 0; i < splits.size(); i++) {
-      if (splits[i] == NULL)
+    for (int i = 0; i < (int)_splits.size(); i++) {
+      if (_splits[i] == NULL)
         break;
-      splits[i]->set_height(r.nlines);
-      splits[i]->adjust_scroll();
+      _splits[i]->set_height(r.nlines);
+      _splits[i]->adjust_scroll();
     }
 
-    for (WINDOW *window : view_cols)
+    for (WINDOW *window : _views)
       delwin(window);
-    view_cols.clear();
-    if (splits.empty())
+    _views.clear();
+    if (_splits.empty())
       return;
-    int splitw = r.ncols / splits.size();
-    for (int i = 0; i < splits.size(); i++) {
+    int splitw = r.ncols / _splits.size();
+    for (int i = 0; i < (int)_splits.size(); i++) {
       int xoffset = i * splitw;
       int w = splitw;
-      if (i == splits.size() - 1) {
+      if (i == (int)_splits.size() - 1) {
         w = r.ncols - xoffset;
       }
-      WINDOW *view = newwin(r.nlines, splitw, r.begy, r.begx + xoffset);
+      WINDOW *view = newwin(r.nlines, w, r.begy, r.begx + xoffset);
       wrefresh(view);
-      view_cols.push_back(view);
+      _views.push_back(view);
     }
   }
 
   void render() {
-    for (int i = 0; i < splits.size(); i++) {
-      if (splits[i] == NULL)
-        break;
-      splits[i]->render(view_cols[i]);
+    assert(_views.size() == _splits.size());
+    for (int i = 0; i < (int)_splits.size(); i++) {
+      werase(_views[i]);
+      wnoutrefresh(_views[i]);
+      if (_splits[i] == NULL)
+        continue;
+      else
+        _splits[i]->render(_views[i]);
     }
   }
 
-  void set_root_directory(const fs::path &path) {
-    FileList *fl = new FileList(path, bounds.nlines);
-    fl->list_files();
-    splits[0] = fl;
-    update_splits();
+  void set_split_path(int splitid, const fs::path &path) {
+    if (_splits[splitid]) {
+      delete _splits[splitid];
+    }
+    _splits[splitid] = new FileList(path, bounds.nlines);
+    select_last_selected_file(splitid);
+    _update_split(splitid + 1);
+  }
+
+  void _update_split(int splitid) {
+    if (splitid >= _splits.size())
+      return;
+
+    if (splitid > 0) {
+      const FileList *parent_split = _splits[splitid - 1];
+      if (!parent_split || parent_split->empty() ||
+          !parent_split->selected_file().is_directory()) {
+        delete _splits[splitid];
+        _splits[splitid] = NULL;
+      } else {
+        fs::path expected_path = parent_split->selected_file().path();
+        if (!_splits[splitid] || expected_path != _splits[splitid]->dirpath) {
+          set_split_path(splitid, expected_path);
+        }
+      }
+
+      if (_splits[splitid]) {
+        _splits[splitid]->adjust_scroll();
+      }
+    }
+
+    if (splitid + 1 < _splits.size()) {
+      _update_split(splitid + 1);
+    }
+  }
+
+  void select_last_selected_file(int splitid) {
+    FileList *split = _splits[splitid];
+    if (!split)
+      return;
+    if (split->empty())
+      return;
+    const fs::path &last_selected_file = _last_selected[split->dirpath];
+    if (split->find_and_select(last_selected_file)) {
+      _splits[splitid]->adjust_scroll();
+    } else {
+      _last_selected[split->dirpath] = split->selected_file();
+    }
   }
 
   void update_history() {
-    last_selected[splits[cur_split]->dirpath] =
-        splits[cur_split]->selected_file();
+    FileList *list = _splits[_cur];
+    if (list->empty())
+      return;
+    const fs::path &path = _splits[_cur]->dirpath;
+    _last_selected[path] = _splits[_cur]->selected_file();
   }
 
   void move_left() {
-    if (!splits[cur_split])
+    if (!_splits[_cur])
       return;
-    if (cur_split == 0) {
-      fs::path new_root = splits[cur_split]->parent_directory();
-      clear_splits(0);
-      set_root_directory(new_root);
-      update_splits();
+
+    if (_cur == 0) {
+      fs::path new_root = _splits[_cur]->parent_directory();
+      if (new_root != _splits[0]->dirpath)
+        set_split_path(0, new_root);
+    } else {
+      _cur--;
     }
-    cur_split = std::max(cur_split - 1, 0);
   }
 
   void move_right() {
-    if (!splits[cur_split])
+    if (!_splits[_cur])
       return;
-    cur_split = std::min(cur_split + 1, (int)splits.size() - 1);
+    if (_cur == (int)_splits.size() - 1) {
+      set_split_path(0, _splits[1]->dirpath);
+    } else {
+      _cur++;
+    }
   }
 
   void move_down() {
-    if (!splits[cur_split])
+    if (!_splits[_cur])
       return;
-    splits[cur_split]->select_next();
-    splits[cur_split]->adjust_scroll();
+    _splits[_cur]->select_next();
+    _splits[_cur]->adjust_scroll();
     update_history();
-    update_splits();
+    _update_split(_cur + 1);
   }
 
   void move_up() {
-    if (!splits[cur_split])
+    if (!_splits[_cur])
       return;
-    splits[cur_split]->select_prev();
-    splits[cur_split]->adjust_scroll();
+    _splits[_cur]->select_prev();
+    _splits[_cur]->adjust_scroll();
     update_history();
-    update_splits();
-  }
-
-  void update_splits() {
-    if (splits[0] == NULL)
-      return;
-    for (int i = 1; i < splits.size(); i++) {
-      fs::path expected_path = splits[i - 1]->selected_file().path();
-      if (!splits[i] || expected_path != splits[i]->dirpath) {
-        if (splits[i])
-          delete splits[i];
-        splits[i] = new FileList(expected_path, bounds.nlines);
-        splits[i]->sort_files(sort_by_name_and_directory);
-        const fs::path &last_selected_file = last_selected[expected_path];
-        if (!splits[i]->find_and_select(last_selected_file)) {
-          last_selected[expected_path] = splits[i]->selected_file();
-        }
-      }
-    }
-  }
-
-  void clear_splits(int splitid) {
-    for (int i = splitid; i < splits.size(); i++) {
-      if (splits[i])
-        delete splits[i];
-      splits[i] = NULL;
-    }
+    _update_split(_cur + 1);
   }
 };

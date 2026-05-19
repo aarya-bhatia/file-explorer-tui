@@ -1,6 +1,5 @@
 #pragma once
 
-#include "action_callbacks.h"
 #include "split_controller.h"
 #include <ncurses.h>
 #include <vector>
@@ -22,7 +21,6 @@ private:
   WINDOW *titleview = NULL;
   WINDOW *cmdlineview = NULL;
   WINDOW *helpview = NULL;
-  std::unique_ptr<ActionCallback> next_callback;
 
   std::string username = "";
   std::string hostname = "";

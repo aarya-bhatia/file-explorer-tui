@@ -20,7 +20,7 @@ LDFLAGS := -lncurses -lm
 DEBUG_FLAGS := -g -O0
 SANITIZER := -fsanitize=address
 
-COMMON_FLAGS := -Wall -Wextra -MMD -MP $(INC_FLAGS) -fdiagnostics-show-template-tree
+COMMON_FLAGS := -Wall -Wextra -Wno-sign-compare -MMD -MP $(INC_FLAGS) -fdiagnostics-show-template-tree
 CXXFLAGS := -std=c++17 $(COMMON_FLAGS)
 CFLAGS := -std=c99 $(COMMON_FLAGS)
 

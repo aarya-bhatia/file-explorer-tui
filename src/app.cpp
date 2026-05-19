@@ -9,7 +9,7 @@ Application::Application(const fs::path &path) {
   hostname = get_hostname();
 
   split_controller = SplitController(num_splits);
-  split_controller.set_root_directory(path);
+  split_controller.set_root_path(path);
 
   initscr();
   cbreak();
@@ -40,24 +40,26 @@ void Application::resize() {
   int title_h = 1;
   int cmd_h = 1;
   int files_h = LINES - title_h - cmd_h;
-  titleview = std::make_unique<TitleView>(
-      Rect{.begy = 0, .begx = 0, .nlines = title_h, .ncols = COLS});
-  cmdlineview = std::make_unique<CmdLineView>(Rect{
-      .begy = title_h + files_h, .begx = 0, .nlines = cmd_h, .ncols = COLS});
-  helpview = std::make_unique<HelpView>(
-      Rect{.begy = 0, .begx = 0, .nlines = LINES, .ncols = COLS});
+  delwin(titleview);
+  delwin(cmdlineview);
+  delwin(helpview);
+
+  // WINDOW *newwin(int nlines, int ncols, int begin_y, int begin_x);
+  titleview = newwin(title_h, COLS, 0, 0);
+  cmdlineview = newwin(cmd_h, COLS, title_h + files_h, 0);
+  helpview = newwin(LINES, COLS, 0, 0);
+
   Rect files_rect = {
       .begy = title_h, .begx = 0, .nlines = files_h, .ncols = COLS};
   split_controller.resize(files_rect);
-  init_views();
 }
 
 void Application::render() {
   if (show_help_menu) {
-    helpview->render();
+    draw_help(helpview);
   } else {
-    titleview->render();
-    cmdlineview->render();
+    draw_title(titleview);
+    draw_cmdline(cmdlineview);
     split_controller.render();
   }
   doupdate();
@@ -103,7 +105,7 @@ Application::Input Application::convert_input(int ch) {
 
 void Application::run() {
   while (running) {
-    log_printf("Drawing application...");
+    log_printf("Redraw");
     render();
     int ch = getch();
     if (ch == KEY_RESIZE) {
@@ -164,7 +166,7 @@ void Application::handle_input_typing(Input &input) {
 }
 
 void Application::handle_input(Input &input) {
-  if (is_typing()) {
+  if (typing) {
     handle_input_typing(input);
     return;
   }
@@ -172,7 +174,7 @@ void Application::handle_input(Input &input) {
   switch (input.type) {
   case Input::Type::ENTER:
     log_printf("Opening selected entry");
-    open_selected_entry();
+    // TODO open_selected_entry();
     break;
 
   case Input::Type::BACKSPACE:
@@ -322,7 +324,7 @@ void Application::draw_cmdline(WINDOW *win) {
   wnoutrefresh(win);
 }
 
-void Application::draw_file_stat(WINDOW *win) {
+void Application::draw_file_stat(WINDOW *) {
   // if (state.count_files() == 0)
   //   return;
   // auto &selected_file = state.get_selected_file();
@@ -338,7 +340,7 @@ void Application::draw_file_stat(WINDOW *win) {
   // wprintw(win, " %s", dispsize.data());
 }
 
-void Application::draw_file_index(WINDOW *win) {
+void Application::draw_file_index(WINDOW *) {
   //   if (state.count_files() > 0) {
   //     char s[24] = {0};
   //     snprintf(s, sizeof s, "[%d/%lu]", 1 + state.selected_entry(),
@@ -350,15 +352,11 @@ void Application::draw_file_index(WINDOW *win) {
 void Application::draw_help(WINDOW *win) {
   werase(win);
   static const std::array menu_items = {
-    "[?] toggle help menu",
-    "[q] quit",
-    "[j] move down",
-    "[k] move up",
-    "[<ENTER>] select",
-    "[-] go to parent dir",
+      "[?] toggle help menu", "[q] quit",         "[j] move down",
+      "[k] move up",          "[<ENTER>] select", "[-] go to parent dir",
   };
 
-  for(int i = 0; i < std::size(menu_items); i++) {
+  for (int i = 0; i < (int)std::size(menu_items); i++) {
     mvwprintw(win, i, 0, menu_items[i]);
   }
   wnoutrefresh(win);

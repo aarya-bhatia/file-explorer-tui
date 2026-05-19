@@ -4,9 +4,9 @@
 #include "viewutil.h"
 #include <cassert>
 #include <filesystem>
+#include <ncurses.h>
 #include <string>
 #include <vector>
-#include <ncurses.h>
 
 namespace fs = std::filesystem;
 
@@ -19,6 +19,9 @@ struct FileList {
 
   FileList(const fs::path &path, int h) : dirpath(path), height(h) {
     list_files();
+    if (!files.empty()) {
+      sort_files(sort_by_name_and_directory);
+    }
     log_printf("opened directory:%s with %zu files", path.c_str(),
                files.size());
   }
@@ -27,9 +30,7 @@ struct FileList {
   size_t size() const { return files.size(); }
   bool empty() const { return files.empty(); }
 
-  void set_height(int h) {
-    height = h;
-  }
+  void set_height(int h) { height = h; }
 
   const fs::directory_entry &selected_file() const {
     assert(!files.empty());

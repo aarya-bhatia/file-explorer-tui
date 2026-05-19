@@ -1,9 +1,9 @@
-#include "action_callbacks.h"
-#include <fcntl.h>
-#include <ncurses.h>
-#include <sys/stat.h>
-#include <unistd.h>
-
+// #include "action_callbacks.h"
+// #include <fcntl.h>
+// #include <ncurses.h>
+// #include <sys/stat.h>
+// #include <unistd.h>
+//
 // bool CreateFileCallback::run(AppState &state) {
 //   log_printf("Started CreateFileCallback with input:%s",
 //            state.cmdline_input.c_str());
