@@ -98,8 +98,10 @@ struct SplitController {
       wnoutrefresh(_views[i]);
       if (_splits[i] == NULL)
         continue;
-      else
-        _splits[i]->render(_views[i]);
+      else {
+        bool has_focus = i == _cur;
+        _splits[i]->render(_views[i], has_focus);
+      }
     }
   }
 

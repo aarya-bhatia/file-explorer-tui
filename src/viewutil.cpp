@@ -22,7 +22,7 @@ void draw_filename(WINDOW *win, const fs::directory_entry &entry) {
 }
 
 void draw_list(WINDOW *win, const std::vector<fs::directory_entry> &files,
-               int view_scroll, int selected) {
+               int view_scroll, int selected, int selected_color_id) {
 
   werase(win);
   wmove(win, 0, 0);
@@ -37,13 +37,20 @@ void draw_list(WINDOW *win, const std::vector<fs::directory_entry> &files,
     int y = i - view_scroll;
     wmove(win, y, 0);
     if (i == selected) {
-      wattron(win, COLOR_PAIR(0) | A_REVERSE);
+      if (selected_color_id > 0)
+        wattron(win, COLOR_PAIR(selected_color_id));
+      else
+        wattron(win, COLOR_PAIR(0) | A_REVERSE);
       draw_filename(win, files[i]);
-      wattroff(win, COLOR_PAIR(0) | A_REVERSE);
+
+      if (selected_color_id > 0)
+        wattroff(win, COLOR_PAIR(selected_color_id));
+      else
+        wattroff(win, COLOR_PAIR(0) | A_REVERSE);
+
     } else {
       draw_filename(win, files[i]);
     }
   }
   wnoutrefresh(win);
 }
-

@@ -153,8 +153,9 @@ struct FileList {
     }
   }
 
-  void render(WINDOW *window) {
-    draw_list(window, files, scroll, selected);
+  void render(WINDOW *window, bool has_focus=false) {
+    int selected_color_id = has_focus? PAIR_FOCUS_SELECTED : PAIR_UNFOCUS_SELECTED;
+    draw_list(window, files, scroll, selected, selected_color_id);
     wnoutrefresh(window);
   }
 };

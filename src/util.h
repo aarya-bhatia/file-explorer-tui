@@ -1,10 +1,8 @@
 #pragma once
+#include <filesystem>
 #include <pwd.h>
 #include <string>
 #include <sys/stat.h>
-
-
-#include <filesystem>
 
 namespace fs = std::filesystem;
 
@@ -12,7 +10,11 @@ struct Rect {
   int begy, begx, nlines, ncols;
 };
 
-enum Colors { Red = 1, Blue, Green, Yellow };
+#define COLOR_BRIGHT_WHITE 10
+#define COLOR_DIM_WHITE 11
+#define PAIR_FOCUS_SELECTED 1
+#define PAIR_UNFOCUS_SELECTED 2
+#define PAIR_COLOR_BLUE 3
 
 #define CTRL(c) ((c) & 0x1F)
 #define MIN_LINES 3

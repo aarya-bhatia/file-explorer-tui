@@ -18,10 +18,17 @@ Application::Application(const fs::path &path) {
   curs_set(0);
   start_color();
   use_default_colors();
-  init_pair(Colors::Red, COLOR_RED, -1);
-  init_pair(Colors::Blue, COLOR_BLUE, -1);
-  init_pair(Colors::Green, COLOR_GREEN, -1);
-  init_pair(Colors::Yellow, COLOR_YELLOW, -1);
+  log_printf("Initializing colors");
+  if (can_change_color()) {
+    init_color(COLOR_BRIGHT_WHITE, 1000, 1000, 1000);
+    init_color(COLOR_DIM_WHITE, 750, 750, 750);
+    init_pair(PAIR_FOCUS_SELECTED, COLOR_BLACK, COLOR_BRIGHT_WHITE);
+    init_pair(PAIR_UNFOCUS_SELECTED, COLOR_BLACK, COLOR_DIM_WHITE);
+  } else {
+    init_pair(PAIR_FOCUS_SELECTED, COLOR_BLACK, 255);
+    init_pair(PAIR_UNFOCUS_SELECTED, COLOR_BLACK, 248);
+  }
+  init_pair(PAIR_COLOR_BLUE, COLOR_BLUE, -1);
   resize();
 }
 
@@ -337,9 +344,9 @@ void Application::draw_file_stat(WINDOW *win) {
       split_controller.get_selected_entry_in_current_split();
   FileStat s{};
   get_file_stat(sel, s);
-  wattron(win, COLOR_PAIR(Colors::Blue));
+  wattron(win, COLOR_PAIR(PAIR_COLOR_BLUE));
   wprintw(win, "%s", s.mode_s.c_str());
-  wattroff(win, COLOR_PAIR(Colors::Blue));
+  wattroff(win, COLOR_PAIR(PAIR_COLOR_BLUE));
   wprintw(win, " %s %s %s", s.owner_name.c_str(), s.group_name.c_str(),
           s.mod_date.c_str());
   std::vector<char> dispsize(32);
