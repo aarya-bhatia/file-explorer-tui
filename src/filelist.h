@@ -1,10 +1,12 @@
 #pragma once
 #include "fileutil.h"
 #include "util.h"
+#include "viewutil.h"
 #include <cassert>
 #include <filesystem>
 #include <string>
 #include <vector>
+#include <ncurses.h>
 
 namespace fs = std::filesystem;
 
@@ -13,14 +15,21 @@ struct FileList {
   std::vector<fs::directory_entry> files;
   int selected = 0;
   int scroll = 0;
-  int *view_height = NULL;
+  int height = 0;
 
-  FileList(const fs::path &path, int *view_height)
-      : dirpath(path), view_height(view_height) {}
+  FileList(const fs::path &path, int h) : dirpath(path), height(h) {
+    list_files();
+    log_printf("opened directory:%s with %zu files", path.c_str(),
+               files.size());
+  }
 
   const fs::directory_entry &at(int i) const { return files[i]; }
   size_t size() const { return files.size(); }
   bool empty() const { return files.empty(); }
+
+  void set_height(int h) {
+    height = h;
+  }
 
   const fs::directory_entry &selected_file() const {
     assert(!files.empty());
@@ -47,8 +56,7 @@ struct FileList {
   int top_entry_index() const { return scroll; }
 
   int bottom_entry_index() const {
-    if (!view_height) return scroll;
-    return std::min<int>(scroll + *view_height - 1, (int)files.size() - 1);
+    return std::min<int>(scroll + height - 1, (int)files.size() - 1);
   }
 
   bool is_entry_visible(int index) const {
@@ -60,7 +68,8 @@ struct FileList {
   }
 
   void filter_files(FilterStrategy filter_strategy) {
-    files.erase(std::remove_if(files.begin(), files.end(), filter_strategy), files.end());
+    files.erase(std::remove_if(files.begin(), files.end(), filter_strategy),
+                files.end());
     if (files.empty())
       selected = 0;
     else if (selected >= (int)files.size()) {
@@ -119,16 +128,32 @@ struct FileList {
 
   void scroll_up() { scroll = std::max<int>(0, scroll - 1); }
   void scroll_down() {
-    if (files.empty()) return;
+    if (files.empty())
+      return;
     scroll = std::min<int>(scroll + 1, (int)files.size() - 1);
   }
 
-  void find_and_select(const fs::path &filepath) {
+  bool find_and_select(const fs::path &filepath) {
     for (int i = 0; i < (int)files.size(); i++) {
-        if (files[i].path() == filepath) {
-            selected = i;
-            break;
-        }
+      if (files[i].path() == filepath) {
+        selected = i;
+        return true;
+      }
     }
+
+    return false;
+  }
+
+  void adjust_scroll() {
+    if (selected < top_entry_index()) {
+      scroll = selected;
+    } else if (selected > bottom_entry_index()) {
+      scroll = selected - height + 1;
+    }
+  }
+
+  void render(WINDOW *window) {
+    draw_list(window, files, scroll, selected);
+    wnoutrefresh(window);
   }
 };

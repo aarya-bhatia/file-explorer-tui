@@ -1,8 +1,11 @@
 #include "app.h"
 #include <fcntl.h>
+#include <filesystem>
+#include <string>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+namespace fs = std::filesystem;
 
 int main(int argc, const char **argv) {
   const char *LOG_FILENAME = "app.log";
@@ -11,18 +14,18 @@ int main(int argc, const char **argv) {
   close(logfile);
   setlocale(LC_ALL, "");
 
-  char *abspath = NULL;
+  fs::path path;
   if (argc > 1) {
-    abspath = realpath(argv[1], NULL);
-    if (!abspath) {
-      perror("realpath");
-      exit(1);
-    }
-    log_printf("Start directory: %s", abspath);
+    path = std::string(argv[1]);
+  } else {
+    path = fs::current_path();
   }
 
-  Application app(abspath);
+  if(!fs::exists(path)) {
+    exit(1);
+  }
+
+  Application app(path);
   app.run();
-  free(abspath);
   return 0;
 }

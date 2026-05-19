@@ -1,5 +1,14 @@
 #include "viewutil.h"
 
+void print_right_align(WINDOW *win, int y, const char *text) {
+  int width = getmaxx(win);
+  int text_len = (int)strlen(text);
+  if (text_len > width) {
+    text_len = width;
+  }
+  mvwaddnstr(win, y, width - text_len, text, text_len);
+}
+
 void draw_filename(WINDOW *win, const fs::directory_entry &entry) {
   if (entry.is_directory()) {
     wprintw(win, "%s/", entry.path().filename().string().c_str());
@@ -37,3 +46,4 @@ void draw_list(WINDOW *win, const std::vector<fs::directory_entry> &files,
   }
   wnoutrefresh(win);
 }
+
