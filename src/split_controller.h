@@ -13,6 +13,32 @@ struct SplitController {
   Rect bounds;
   std::vector<WINDOW *> _views;
 
+  bool is_current_split_empty() const {
+    return !_splits[_cur] || _splits[_cur]->empty();
+  }
+
+  unsigned count_files_in_current_split() const {
+    return is_current_split_empty() ? 0 : _splits[_cur]->size();
+  }
+
+  const FileList *get_current_split() const { return _splits[_cur]; }
+
+  fs::path get_dirname_in_current_split() const {
+    if (is_current_split_empty())
+      return fs::path();
+    return _splits[_cur]->dirpath;
+  }
+
+  const fs::path &get_selected_file_in_current_split() const {
+    assert(!is_current_split_empty());
+    return _splits[_cur]->selected_file().path();
+  }
+
+  const fs::directory_entry &get_selected_entry_in_current_split() const {
+    assert(!is_current_split_empty());
+    return _splits[_cur]->selected_file();
+  }
+
   std::string root_path() const {
     return _splits[0] ? _splits[0]->dirpath.string() : "";
   }

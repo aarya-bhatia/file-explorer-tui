@@ -264,36 +264,42 @@ void Application::handle_user_command(const std::vector<std::string> &tokens) {
 void Application::draw_title(WINDOW *win) {
   werase(win);
 
-  // wmove(win, 0, 0);
-  // wprintw(win, "%s ", titleline.c_str());
-  //
-  // fs::path display_path = state.get_selected_filepath();
-  // fs::path cwd = state.get_cwd();
-  //
-  // if (home_env != NULL) {
-  //   fs::path home(home_env);
-  //   // Check if cwd is under home
-  //   auto rel = fs::path();
-  //   try {
-  //     // Simple check: does the path start with home?
-  //     std::string cwd_s = cwd.string();
-  //     std::string home_s = home.string();
-  //     if (cwd_s.find(home_s) == 0) {
-  //       // It's under home
-  //       if (cwd_s == home_s) {
-  //         wprintw(win, "~");
-  //       } else {
-  //         wprintw(win, "~/%s", cwd_s.substr(home_s.length() + 1).c_str());
-  //       }
-  //     } else {
-  //       wprintw(win, "%s", cwd_s.c_str());
-  //     }
-  //   } catch (...) {
-  //     wprintw(win, "%s", cwd.c_str());
-  //   }
-  // } else {
-  //   wprintw(win, "%s", cwd.c_str());
-  // }
+  wmove(win, 0, 0);
+  wprintw(win, "%s@%s: ", username.c_str(), hostname.c_str());
+
+  if (!split_controller.is_current_split_empty()) {
+    fs::path display_path =
+        split_controller.get_selected_file_in_current_split();
+    fs::path cwd = split_controller.get_dirname_in_current_split();
+
+    const char *home_env = getenv("HOME");
+    if (home_env != NULL) {
+      fs::path home(home_env);
+      // Check if cwd is under home
+      auto rel = fs::path();
+      try {
+        // check if the path start with home?
+        std::string cwd_s = cwd.string();
+        std::string home_s = home.string();
+        if (cwd_s.find(home_s) == 0) {
+          // It's under home
+          if (cwd_s == home_s) {
+            wprintw(win, "~");
+          } else {
+            wprintw(win, "~/%s", cwd_s.substr(home_s.length() + 1).c_str());
+          }
+        } else {
+          wprintw(win, "%s", cwd_s.c_str());
+        }
+      } catch (...) {
+        wprintw(win, "%s", cwd.c_str());
+      }
+    } else {
+      wprintw(win, "%s", cwd.c_str());
+    }
+
+    wprintw(win, "/%s", display_path.filename().c_str());
+  }
 
   wnoutrefresh(win);
 }
@@ -302,51 +308,56 @@ void Application::draw_cmdline(WINDOW *win) {
   werase(win);
   wmove(win, 0, 0);
 
-  // if (!state.statushidden) {
-  //   wprintw(win, "%s", state.statusline.c_str());
-  //   wnoutrefresh(win);
-  //   return;
-  // }
-  //
-  // switch (state.mode) {
-  // case AppState::Mode::Command:
-  //   wprintw(win, ":%s", state.cmdline_input.c_str());
-  //   break;
-  // case AppState::Mode::Search:
-  //   wprintw(win, "/%s", state.cmdline_input.c_str());
-  //   break;
-  // case AppState::Mode::Normal:
-  //   draw_file_stat();
-  //   draw_file_index();
-  //   break;
-  // }
+  if (!statushidden) {
+    wprintw(win, "%s", statusline.c_str());
+    wnoutrefresh(win);
+    return;
+  }
+
+  switch (mode) {
+  case Mode::Command:
+    wprintw(win, ":%s", cmdline_input.c_str());
+    break;
+  case Mode::Search:
+    wprintw(win, "/%s", cmdline_input.c_str());
+    break;
+  case Mode::Normal:
+    draw_file_stat(win);
+    draw_file_index(win);
+    break;
+  }
 
   wnoutrefresh(win);
 }
 
-void Application::draw_file_stat(WINDOW *) {
-  // if (state.count_files() == 0)
-  //   return;
-  // auto &selected_file = state.get_selected_file();
-  // FileStat s{};
-  // get_file_stat(selected_file, s);
-  // wattron(win, COLOR_PAIR(Colors::Blue));
-  // wprintw(win, "%s", s.mode_s.c_str());
-  // wattroff(win, COLOR_PAIR(Colors::Blue));
-  // wprintw(win, " %s %s %s", s.owner_name.c_str(), s.group_name.c_str(),
-  //     s.mod_date.c_str());
-  // std::vector<char> dispsize(32);
-  // get_human_size(s.size, dispsize.data(), dispsize.size());
-  // wprintw(win, " %s", dispsize.data());
+void Application::draw_file_stat(WINDOW *win) {
+  if (split_controller.is_current_split_empty())
+    return;
+  const fs::directory_entry &sel =
+      split_controller.get_selected_entry_in_current_split();
+  FileStat s{};
+  get_file_stat(sel, s);
+  wattron(win, COLOR_PAIR(Colors::Blue));
+  wprintw(win, "%s", s.mode_s.c_str());
+  wattroff(win, COLOR_PAIR(Colors::Blue));
+  wprintw(win, " %s %s %s", s.owner_name.c_str(), s.group_name.c_str(),
+          s.mod_date.c_str());
+  std::vector<char> dispsize(32);
+  get_human_size(s.size, dispsize.data(), dispsize.size());
+  wprintw(win, " %s", dispsize.data());
 }
 
-void Application::draw_file_index(WINDOW *) {
-  //   if (state.count_files() > 0) {
-  //     char s[24] = {0};
-  //     snprintf(s, sizeof s, "[%d/%lu]", 1 + state.selected_entry(),
-  //         state.count_files());
-  //     print_right_align(0, s);
-  //   }
+void Application::draw_file_index(WINDOW *win) {
+  char s[24] = {0};
+  if (split_controller.is_current_split_empty()) {
+    snprintf(s, sizeof s, "[0/0]");
+  } else {
+    snprintf(s, sizeof s, "[%d/%lu]",
+             1 + split_controller.get_current_split()->selected,
+             split_controller.get_current_split()->size());
+  }
+
+  print_right_align(win, 0, s);
 }
 
 void Application::draw_help(WINDOW *win) {
