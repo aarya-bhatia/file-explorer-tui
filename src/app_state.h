@@ -3,11 +3,32 @@
 #include "fileutil.h"
 #include "util.h"
 #include <assert.h>
+#include <map>
 #include <string>
 #include <time.h>
 
 struct AppState {
   AppState(const char *cwd = NULL);
+
+  std::map<std::string, FileList> fl_cache;
+  std::vector<FileList> splits;
+  int focused_split_id;
+
+  void split_exists(int splitid) {
+    assert(splitid >= 0);
+    assert(splitid < (int)splits.size());
+  }
+
+  void focus_split(int splitid) { split_exists(splitid); 
+    // TODO implement this
+    auto &dirname = get_selection(splitid);
+    // TODO if no change return
+    for(int i = splitid; i < splits.size(); i++) {
+      // TODO implement this
+      // if previous split has any focused dir, load the subdir in next split
+      // for new split, auto-sort by dir and focus on the first dir by default.
+    }
+  }
 
   std::vector<FileList> open_dirs;
 
@@ -24,7 +45,7 @@ struct AppState {
   const fs::directory_entry &get_selected_file() const {
     return cur_dir().selected_file();
   }
-  
+
   std::string get_selected_filename() const {
     return cur_dir().selected_file().path().filename().string();
   }
@@ -33,9 +54,11 @@ struct AppState {
     return cur_dir().selected_file().path();
   }
 
-  const fs::path& get_cwd() const { return cur_dir().dirpath; }
+  const fs::path &get_cwd() const { return cur_dir().dirpath; }
   size_t count_files() const { return cur_dir().size(); }
-  const fs::directory_entry& get_file(int index) const { return cur_dir().at(index); }
+  const fs::directory_entry &get_file(int index) const {
+    return cur_dir().at(index);
+  }
 
   int selected_entry() const { return cur_dir().selected; }
   int user_scroll() const { return cur_dir().scroll; }

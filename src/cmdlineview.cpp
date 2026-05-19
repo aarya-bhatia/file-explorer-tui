@@ -1,5 +1,5 @@
-#include "../include/fileutil.h"
-#include "../include/util.h"
+#include "fileutil.h"
+#include "util.h"
 #include "cmdlineview.h"
 
 void CmdLineView::render(const AppState &state) {

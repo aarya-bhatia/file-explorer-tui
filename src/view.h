@@ -1,5 +1,5 @@
 #pragma once
-#include "../include/app_state.h"
+#include "app_state.h"
 #include "util.h"
 #include <ncurses.h>
 
